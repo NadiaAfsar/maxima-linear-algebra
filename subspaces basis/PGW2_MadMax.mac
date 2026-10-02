@@ -1,0 +1,658 @@
+/*MadMax
+	Nadia Afsar: nadiaafsar383@gmail.com
+	Roya Zeraati: roya.zeraati93@gmail.com
+	Sara Mohammadi Mohammadi: saradoublemohammadi@gmail.com
+	Mahdieh Yazdan Panah: mahdieh.yazdanpanah83@gmail.com
+*/
+
+
+
+
+
+/*--------Question1-helpers-------*/
+
+to_matrix(M):= if matrixp(M) then M else apply('matrix, M)$
+
+/*swap row i with j*/
+swap_row(M, i, j) := block (                
+L: M[i],
+M[i]: M[j],
+M[j]: L,
+M
+)$
+
+/*add k times row j to row i */
+add_row(M, i, j, k) := block(
+M[i]: M[i] + k * M[j],
+M
+)$
+
+/*multiply row i by scalar k*/
+multiply_row(M, i, k) := block(
+M[i]: k * M[i],
+M
+)$
+
+
+/*defining function*/
+gauss_row_echelon(A) := block(
+    [A: to_matrix(A), P, E: [], n: length(A), m: length(A[1 ]), i:1 , j, k:1 , pivot, factor, det_factor:1 ],
+    P: [copymatrix(A)],
+    
+    while i <= n and k <= m do (
+        /*finding pivot row*/
+        pivot: i,
+        while pivot <= n and A[pivot][k] = 0  do pivot: pivot + 1,
+        if pivot > n then continue, /* No pivot in this column*/
+        
+        if pivot <= n then (
+             /*swap rows*/
+            if pivot > i and A[i][k]=0  then (
+                A: swap_row(A, i, pivot),
+                det_factor: -det_factor,
+                E: endcons(ident(n), E),
+                E[length(E)]: swap_row(E[length(E)], i, pivot),
+                P: endcons(copymatrix(A), P)
+            ),
+            
+           /*Eliminating blew rows*/
+            for j: i+1 thru n do (
+                if A[j][k] # 0 and A[i][k] # 0  then (
+                    factor: -A[j][k]/A[i][k],
+                    A: add_row(A, j, i, factor),
+                    E: endcons(ident(n), E),   /*endcons: appends an element to the end of a list*/ 
+                    E[length(E)]: add_row(E[length(E)], j, i, factor),   /*elementary matrix for swap*/
+                    P: endcons(copymatrix(A), P)
+                )
+            ),
+            i: i+1
+        ),
+        k: k+1
+    ),
+    [P, E]
+)$
+
+
+/*defining function*/
+gauss_jordan(A) :=  block(
+    [A: to_matrix(A), P, E: [], n: length(A), m: length(A[1 ]), i:1 , j, k:1 , pivot, factor],
+    P: [copymatrix(A)],
+    
+    while i<=n and k<=m do (
+    /*finding pivot row*/
+        pivot: i,
+        while pivot <=n and A[pivot][k] = 0  do pivot: pivot +1 ,
+        if pivot > n then continue,
+        
+       if pivot<=n then (
+            /*swap rows*/
+        if pivot > i and A[i][k]=0  then (
+                A: swap_row(A, i, pivot),
+                E: endcons(ident(n), E),               
+                E[length(E)]: swap_row(E[length(E)], i, pivot),       
+                P: endcons(copymatrix(A), P)       
+        ),
+        
+         /* scale pivot to 1 */
+        if A[i][k] # 1  and A[i][k] #0  then (
+        factor: 1 /A[i][k],
+        A: multiply_row(A, i, factor),
+        E: endcons(ident(n), E),
+        E[length(E)]: multiply_row(E[length(E)], i, factor),
+        P: endcons(copymatrix(A), P)
+        ),
+        
+        /*Eliminating blew and above rows*/
+        for j:1  thru n do (
+        if j#i  and  A[j][k]#0  and A[i][k]#0 then (
+            factor: -A[j][k]/A[i][k],
+            A: add_row(A, j, i, factor),
+            E: endcons(ident(n), E),
+            E[length(E)]: add_row(E[length(E)], j, i, factor),
+            P: endcons(copymatrix(A), P)
+                )
+            ),
+            i: i+1
+            ),
+        k: k+1
+        ),
+    [P, E]
+    )$
+
+  
+/* --------- Question 1 ~ a --------- */
+
+check_zero_list(list) := block(
+   [test],
+   test: true,
+   for i:1 thru length(list) do(
+     if list[i] # 0 then test : false
+   ),
+   test
+);
+
+count_zero_rows(M) := block(
+  [count],
+  count : 0,
+  for i:1 thru length(M) do (
+    if check_zero_list(M[i]) = true then (
+      count : count + 1
+    )
+  ),
+  count
+)$
+
+
+rank(matrix) := block(
+   [n , r],
+   n : length(matrix),
+   r : echelon(matrix),
+   rank : n - count_zero_rows(r),
+   rank
+)$
+
+row_space(m) := block (
+  [R , num , rm],
+  rm : echelon(m),
+  num : rank(rm),
+  R : [],
+  for i : 1 thru num do (
+    R : endcons(rm[i] , R)
+  ),
+  R
+)$
+
+Null_Space(matrix) := block(
+    [m , n , I , M , result , N , rm],
+  
+  n: length(matrix),
+    m: length(matrix[1]),
+  
+    I:ident(m),
+  M: addcol(transpose(matrix), I),
+    rm : gauss_jordan(M)[1][length(gauss_jordan(M)[1])],
+  
+  result : zeromatrix(m - rank(transpose(matrix)), m),
+  for i:1 thru (m - rank(transpose(matrix))) do (
+    for j:1 thru m do (
+       result[i][j] : M[rank(transpose(matrix)) + i][n + j]
+    )
+  ),
+    N : row_space(result),
+  N
+
+)$
+
+four_basis(matrix):= block(
+    [m , R , c , N, Np , P],
+    m : to_matrix(matrix),
+    R : row_space(m),
+  C : row_space(transpose(m)),
+  N : Null_Space(m),
+  Np : Null_Space(transpose(m)),
+  P : [R, C , N , Np]  ,
+  return(P)
+   
+)$
+
+/* --------- Question 1 ~ b --------- */
+
+four_basis_mat(A):= block (
+   [list , R , C , N , Np],
+   r : four_basis(A)[1],
+   h : four_basis(A)[2],
+   n : four_basis(A)[3],
+   np :  four_basis(A)[4],   
+   
+   R : to_matrix(r),
+   C : transpose(to_matrix(h)),
+   N : transpose(to_matrix(n)),
+   Np : to_matrix(np),
+   
+   if length(N) = 0 then N: false,
+   if length(Np) = 0 then Np: false,
+   if length(R) = 0 then R: false,
+   if length(C) = 0 then C: false,
+   
+   p : [R ,C ,N , Np],
+   p
+
+)$
+
+/*-----------Question2-Helpers-----------*/
+
+
+row_echelon_form(A) := block(
+    [n: length(A), m: length(A[1]), i, j, pivot, factor],
+    A: copymatrix(A), 
+    for i: 1 thru n do (
+        pivot: 1,
+        while (pivot <= m and A[i][pivot] = 0) do (
+            pivot: pivot + 1
+        ), 
+        if pivot <= m and i < n then (
+            for j: i+1 thru n do (
+                if A[j][pivot] # 0 then ( 
+                    factor: -A[j][pivot] / A[i][pivot],
+                    A: add_row(A, j, i, factor)
+                )
+            )
+        )
+    ),
+    A
+)$
+
+horizontal_join(M1, M2) := block(H: M1, M3: transpose(M2),
+  if length(M1) = length(M2) then (
+    for i:1 thru length(M3) do
+      H: addcol(H, transpose(M3[i]))
+  )
+  else H: false, H)$
+
+vertical_join(M1, M2) := block(V: M1,
+  if length(M1)=0 then (
+    for i:1 thru length(M2) do
+      V: addrow(V, M2[i])
+  )
+  else (
+    if length(M1[1]) = length(M2[1])  then (
+      for i:1 thru length(M2) do
+        V: addrow(V, M2[i])
+    )
+    else V: false)
+  , V)$ 
+
+join_matrices(L1, L2) := block(J: to_matrix(L2[1]),
+  for i:2 thru length(L2) do
+    if (matrixp(J) and length((L1[i])[1]) = length((L2[i])[1]) ) then J: horizontal_join(J, to_matrix(L2[i]))
+    else block(
+      J: false, i:length(L2)
+    )
+  , J)$
+
+block_matrix(L):= block(M: zeromatrix(0,0),
+  for i:1 thru length(L) do 
+    if matrixp(M) then block(
+      M2: join_matrices(L[1], L[i]),
+      if matrixp(M2) then M: vertical_join(M, M2)
+      else block(M: false, i: length(L))) 
+    else block(M: false, i: length(L))
+  , M)$
+
+
+is_not_zero(L) := block(
+  [b], b: false,
+  for i: 1 thru length(L) do
+    if L[i] # 0 then b: true,
+  b)$
+
+find_base(L):= block([newlist:[], M, B: [], G],
+if length(L) > 0 then (
+    for i:1 thru length(L) do (
+        newlist: append(newlist, [[[L[i]]]])
+    ),
+    M: block_matrix(newlist), 
+    G: echelon(M),
+    for i:1 thru length(G) do (
+        if is_not_zero(G[i]) then B: append(B, [G[i]])
+    )), 
+    B)$
+
+extract_non_zeros(M, r, n):= block([L:[], l:[], b],
+    for i: r+1 thru length(M) do (
+        b: true,
+        for j: 1 thru n do if M[i][j] # 0 then (b: false, L:[]),
+        if b=true then (l: [],
+        for k: n+1 thru 2*n do l: append(l, [M[i][k]]),
+        if is_not_zero(l) = true then L: append(L, [copylist(l)])
+            )
+    ),
+    L)$
+
+get_complement(P, V):= block([L:[], M: zeromatrix(0,0), R, n: length(P), m: length(V), G],
+    for i:1 thru n do M: addrow(M, P[i]),
+    for i:1 thru m do M: addrow(M, V[i]),
+    R: row_echelon_form(copymatrix(M)), 
+    for i: n+1 thru n+m do if is_not_zero(R[i]) then L: append(L, [M[i]]),
+    L)$
+
+base_for_intersection(P1, P2):= block (
+    [M, Q],
+    M: block_matrix([[P1,P1],[P2, zeromatrix(length(P2),length(P2[1]))]]),
+    M: echelon(M),
+    Q: extract_non_zeros(M, length(P1), length(list1[1])), 
+    Q)$
+ 
+/*------------Question2-------------*/
+subspaces(L1, L2):= block([L, P, Q, P1, P2, list1: L1, list2: L2, M, g, C1, C2],
+    L: append(list1, list2), 
+    P: find_base(L), 
+    P1: find_base(list1),
+    P2: find_base(list2),
+    Q: base_for_intersection(P1, P2),
+    C1: get_complement(Q, P1), 
+    C2: get_complement(Q, P2),
+    [P, Q, C1, C2])$
+
+
+/*---------------Question3-Helpers--------------*/
+list_to_matrix(L):= block( [n,m,M],
+if listp(L) then (
+    n:length(L),
+    if n>0 then (
+            m:length(L[1]),
+            M: zeromatrix(n,m),
+            for i:1 thru n do (
+                for j:1 thru m do (
+                    M[i][j]:L[i][j]
+                )
+            ),
+            L:M
+    )
+),
+    L
+)$
+to_list(M):= block(
+[list:[],rows: length(M)],
+    if matrixp(M) then(
+            for i: 1 thru rows do (
+                    list: endcons(args(M[i]), list)
+            ),
+        list
+    )else (
+        M
+    )  
+);
+to_column_list(M):= block(
+[list:[],rows: length(M),j],
+    if matrixp(M) then(
+            for i: 1 thru rows do (
+                    list: endcons(args(M[i]), list)
+            ),
+        list
+    )else (
+        list:makelist([0], j, 1, rows),
+        for i: 1 thru rows do (
+            list[i][1]:M[i]
+        ),
+        list
+    )  
+)$
+
+/*-------------Question3--------------*/
+particular_solution(A, b) := block(
+    [A_list: to_list(A), b:to_column_list(b), E: [], n: length(A), m: 0, size, i: 0, j: 0, pivot, line0, found: false, x, B],
+       /*b should be a list*/
+    if not (n = 0) and n = length(b) and length(b[1]) = 1 then (
+        m: length(A_list[1]),
+        size: max(m + 1, n),
+        /* B := [A | -b] */
+        B: makelist(makelist(0, j, 1, m + 1), i, 1, size),
+        
+        for i: 1 thru n do (
+            for j: 1 thru m do (
+                B[i][j]: A[i][j]
+            ),
+            B[i][m + 1]: -b[i][1]
+        ),
+
+        /* reduced row echelon */
+        E: gauss_jordan(B),
+        B: E[1][length(E[1])],
+
+        /* move pivots to diagonal */
+        for i: 1 thru n do (
+            pivot: 1,
+            j: n - i + 1,
+            while pivot <= m + 1 and not B[j][pivot] = 1 do (
+                pivot: pivot + 1
+            ),
+            if pivot <= m + 1 and not pivot = j then (
+                B: swap_row(B, pivot, j)
+            )
+        ),
+
+        /* -I */
+        for i: 1 thru m + 1 do (
+            B[i][i]: B[i][i] - 1
+        ),
+
+        /* particular solution : dividing the column with nonzero last element by it */
+        x: makelist([0], j, 1, m),
+
+        for i: 1 thru size do (
+            if not found and not B[m + 1][i] = 0 then (
+                for j: 1 thru m do (
+                    x[j][1]: B[j][i] / B[m + 1][i]
+                ),
+                found: true
+            )
+        ),
+
+        if found then (
+            list_to_matrix(x)
+        ) else (
+            false
+        )
+    ) else (
+        false
+    )
+)$
+
+
+/*------------------------Question4-Helpers-------------------*/
+/*not in span function checker-----------------------*/
+not_in_span (phi , Bp):= block ([
+        M:[], r , c , test ],
+test: false,
+M: to_matrix(phi),
+r: rank(M),
+c : length(subspaces(phi, Bp)[2]),
+if r # c then test : true, 
+ test   
+)$
+/*-------------------------Question4-a----------------------------*/
+  mat_bb(B,Bp,phi):=
+block([M:[], s: length(Bp), r: length(phi), m: length(phi[1 ]), landas], 
+    
+    if not_in_span (phi , Bp)=true then (
+    error("phi is not in span of Bp")
+    ),
+    
+    landas: makelist(c[i], i, 1 , s),   /* c[i] is scalar */
+    for k:1  thru r do (
+        eqs: makelist(
+            sum(landas[j] * Bp[j][i], j, 1 , s) = phi[k][i],
+            i, 1 , m),
+        sols: linsolve (eqs, landas),
+        coeffs: makelist(rhs(sols[i]), i, 1 , s),
+        M: endcons(coeffs, M)
+    ),
+apply(matrix, M)
+)$
+
+
+/*-----------------------Question4-b----------------------------*/
+/*defining function*/
+change_of_basis_matrix(B1, B2):=
+block([M: [], s: length(B1), n: length(B1[1 ]), landas],
+    
+    if length(B2) # s then error("Bases don't have same number of vectors"),
+    /* ما اینطور فرض کردیم که تابع از بی1 به بی2، یک  به یک باشد یعنی تغییر پایه به درستی انجام شود و کل فضا تولید شود نه زیرفضایی از آن و کرنل=0 باشد */
+    
+    if length(B2[1 ]) # n then error("n # m: field is not same"),
+    
+landas: makelist(c[i], i, 1 , s),   /* c[i] is scalar */
+for k:1  thru s do (
+        eqs: makelist(
+            sum(landas[j] * B2[j][i], j, 1 , s) = B1[k][i],
+            i, 1 , n),
+         sols: linsolve (eqs, landas),
+        if sols = [] then error("Bases don't span same space"),
+        coeffs: makelist(rhs(sols[i]), i, 1 , s),
+        M: endcons(coeffs, M)
+    ),
+apply(matrix, M)
+)$
+
+/*--------------------Question5-Helpers--------------------*/
+
+/* matrix size checker */
+get_dims(expr) := block (
+    if matrixp(expr) then (
+        matrix_size(expr)
+    ) else if atom(expr) then (
+        error("invalid input")
+    ) else (
+        if op(expr) = "+" or op(expr) = "-" then (
+            [m1, n1] : get_dims(args(expr)[1 ]),
+            [m2, n2] : get_dims(args(expr)[2]),
+            if m1 = m2 and n1 = n2 then [m1, n1]
+            else error("invalid input")
+        )
+        else if op(expr) = "*" or op(expr) = "." then (
+            [m1, n1] : get_dims(args(expr)[1 ]),
+            [m2, n2] : get_dims(args(expr)[2]),
+            if n1 = m2 then [m1, n2]
+            else error("invalid input")
+        )
+        else if op(expr) = "'" then (                /*transpose(X) */
+            [n, m] : get_dims(args(expr)[1 ]),
+            [m, n]
+            )
+        else if op(expr) = "^^" then (               /* matrix power */
+            [m, n] : get_dims(args(expr)[1 ]),
+            pow : args(expr)[2],
+            if m = n then [m, n]    
+            else error("invalid input")
+        )
+        else error("invalid input")
+    )
+)$
+
+check_matrix_expr(expr) := block(
+    [errmsg: ""],
+    errcatch(
+        get_dims(expr),
+        errmsg: errormsg()
+    ),
+    if errmsg = "" then true
+    else (print("invalid input"), false)
+)$
+
+
+dimension_check(L,m):= block(
+[dims_valid: true],
+/* dimension check */
+    for i: 1  thru m do (
+        if not check_matrix_expr(L[i]) then (
+            dims_valid: false,
+            print("expr", i, "invalid input")
+        )
+    ),
+    if not dims_valid then false
+    else true
+)$
+
+
+linear_check(L,m,X,r,s):= block(
+    [X_build,flatted,eqns, expr_build,expr_calculated,all_valid:true],
+X_build: unknown_matrix("x", r, s),
+    flatted: flatten(args(X_build)),
+    for i: 1  thru m do (
+        eqns: [],
+        
+        expr_build: subst('X = X_build, L[i]),  
+        expr_calculated: ev(expr_build, nouns),
+
+        /* flatten into scalar equations */
+        if matrixp(expr_calculated) then (
+            for k: 1  thru length(expr_calculated) do (
+                for t: 1  thru length(expr_calculated[1 ]) do (
+                    eqns: cons(expand(expr_calculated[k][t]) = 0 , eqns)
+                )
+            )
+        ) else (
+            eqns: cons(expand(expr_calculated) = 0 , eqns)
+        ),
+
+        /* check linearity */
+        if not every(
+            lambda([p],
+                polynomialp(lhs(p), flatted) and
+                degree(lhs(p), flatted) <= 1
+            ),
+            eqns
+        ) then (
+            all_valid: false
+        )
+    ),
+all_valid
+)$
+
+base_for_intersection(P1, P2):= block (
+    [M, Q],
+    M: block_matrix([[P1,P1],[P2, zeromatrix(length(P2),length(P2[1]))]]),
+    M: echelon(M),
+    Q: extract_non_zeros(M, length(P1), length(list1[1])), 
+    Q)$
+
+list_varl(X) := block (
+   [v],
+   v : [],
+   for i:1 thru length(X) do (
+     for j:1 thru length(X[1]) do (
+	   v : endcons(X[i][j] , v)
+	 )
+   ),
+   v
+)$
+
+one_ans(list):= block(
+    for i:1 thru length(list)-1 do (
+	  list[i+1] : subspaces(list[i] , list[i+1])
+	),
+    list[length(list)]
+)$
+
+solution(L1, L2):= block(
+    [X: L2[1], r: L2[2], s: L2[3], B, Z, L:[] , A:[]],
+    X: unknown_matrix(X, r, s),
+    
+	L : list_varl(X), 
+    
+	L1: map(lambda([eq], ev(eq, nouns)), L1), 
+	num : length(L),
+    
+    for i:1 thru length(L1) do (
+	   zarib : coefmatrix(get_exprs(L1[i]) ,L),
+	   s : linsolve(zarib , zeromatrix(num , 1)),
+	   A : endcons(s, A)
+	),	
+	
+	one_ans(A)
+	
+
+)$
+
+
+
+/* -------------------------Question5---------------------------- */
+mat_linsolve(L1, L2) := block(
+    [X: L2[1 ], r: L2[2], s: L2[3], m: length(L1),base, ans],
+    if dimension_check(copylist(L1),m) and linear_check(copylist(L1),m,X,r,s) then (
+        base : base_for_homogenous(copylist(L1),copylist(L2)),
+        ans: solution(L1, l2),
+        [base, ans]
+    )else(
+        print("invalid input"),
+        false
+    )
+    )$
+
+/*کد ما برای سوال 5 در قسمت چک کردن ولید بودن دستگاه به مشکل می‌خورد که آن را هم تا حد خوبی سعی کرده‌ایم حل کنیم ولی پایه همگن شده دستگاه و جواب خصوصی را به درستی حساب می‌کند.*/ 
+
+
+
+
+

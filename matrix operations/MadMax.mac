@@ -1,0 +1,1203 @@
+
+/*MadMax
+	Nadia Afsar: nadiaafsar383@gmail.com
+	Roya Zeraati: roya.zeraati93@gmail.com
+	Sara Mohammadi Mohammadi: saradoublemohammadi@gmail.com
+	Mahdieh Yazdan Panah: mahdieh.yazdanpanah83@gmail.com
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+/* --------- Question 1  --------- */
+to_matrix(L):= if matrixp(L) then L else apply('matrix, L);
+
+
+
+
+
+
+
+
+
+
+
+
+/* --------- method 2  --------- */
+find_first_non_zero_member(list) :=  block (
+[index],
+index : length(list) + 1,
+for i:1 thru length(list) do (
+   if list[i]# 0 then (
+      index : i,
+	  return(index)
+   ) 
+),
+return(index)
+);
+check_first_element_of_one(list) := block (
+   [index , test],
+   index : find_first_non_zero_member(list),
+   test : false,
+   if index <= length(list) then (
+      if list[index] = 1 then test : true
+   ),
+   return(test)
+);
+get_matrix_column (matrix , col) := block (
+    [result],
+    result: transpose(matrix),
+    result[col]
+);
+is_all_zero_except (list , index) := block (
+   [test],
+   test : true,
+   for i:1 thru index-1 do (
+      if list[i] # 0 then (
+     	  test : false,
+	      return(test)
+	  )
+   ),
+   for i:index+1 thru length(list) do (
+       if list[i] # 0 then (
+     	  test : false,
+	      return(test)
+	  )	 
+   ),
+   return(test)
+
+);
+diagonal_elements(matrix) := block (
+   [result , i],
+   result : [],
+   test : true,
+   
+   if is_square_manual(matrix) = false then (
+      test : false,
+	  return(false)
+   ),
+   
+   for i:1 thru length(matrix) do (
+       result : endcons(matrix[i][i], result)
+   ),
+   return(result)
+);
+is_square_manual(matrix) := block(
+    [rows, cols],
+    rows : length(matrix),
+    cols : length(matrix[1]),
+	test : true,
+	if rows # cols then test : false,
+    return(test)  
+);
+is_diagonal_matrix(matrix) := block(
+   [rows, cols],
+   rows : length(matrix),
+   cols : length(matrix[1]),
+  
+   if rows # cols then return(false),
+
+   for i:1 thru rows do (
+      for j:1 thru cols do (
+         if i # j and matrix[i][j] # 0 then return(false)
+      )
+   ),
+  
+   return(true)
+);
+is_elementry_type1(matrix) := block(
+    [diagonal, num , rows , test],
+    num : 0,
+	rows : length(matrix),
+	test : true,
+    
+    if is_square_manual(matrix) = false then test : false,
+    if is_diagonal_matrix(matrix) = false then test : false,
+    
+	diagonal : diagonal_elements(matrix),
+    for k:1 thru rows do (
+        if diagonal[k] = 0 then test : false, 
+        if diagonal[k] = 1 then num : num + 1
+    ),
+   
+    if num < length(matrix)-1 then test : false,
+    
+    return(test)
+);
+is_elementry_type2(matrix) := block(
+   [test, num, rows, cols, m],
+   test : true,
+   num : 0,
+   rows : length(matrix),
+   cols : length(matrix[1]),
+   m : matrix,
+
+   if rows # cols then test : false,
+   if is_diagonal(m) = true then test : false,
+
+   for i:1 thru rows do (
+      if m[i][i] # 1 then test : false
+   ),
+
+   
+   for i:1 thru rows do (
+      for j:1 thru cols do (
+         if m[i][j] # 0 then num : num + 1
+      )
+   ),
+
+   if num # (rows + 1) then test : false,
+   return(test)
+);
+is_elementry_type3(matrix) := block(
+    [num , test, diagonal],
+    num : 0,
+	test : false,
+
+    if check_permutation(matrix) = true then (
+	    diagonal : diagonal_elements(matrix),
+        for i:1 thru length(matrix) do (
+            if diagonal[i] = 0 then num : num + 1     
+	   ), 
+	   if num = 2 then test : true  
+   ),
+   return(test)
+);
+is_element_in_my_list(j , list):=block (
+   [test],
+   test : false,
+   for i:1 thru length(list) do (
+      if j = list[i] then test : true
+   ),
+   test
+);
+delete_element_formul(list) := block(
+    [result],
+    result : [0],
+    for i:1 thru length(list) do (
+	    if member(list[i] , result) = false then (
+		   result : endcons(list[i] , result)
+		)
+	),
+	result
+);
+
+/* --------- Question 2 ~ a --------- */
+check_row_echelon(matrix) := block(
+  [rows, cols ,test, row1, row2 , t1 , t2, m1, m2],
+  m1 : to_matrix(matrix),
+  m2 : copymatrix(m1),
+  rows : length(m2),
+  cols : length(m2[1]),
+  test :  true,   
+  
+  for i:1 thru rows-1 do (
+     row1 : m2[i],
+	 row2 : m2[i+1],
+	 t1 : find_first_non_zero_member(row1),
+	 t2 : find_first_non_zero_member(row2),
+	 
+	 if t1 > t2 then test : false,
+	 if t1 = t2 then( 
+		if t1 # cols + 1 then test : false
+	 )
+  ),
+  return(test)
+);
+
+check_reduced_row_echelon(matrix) := block(
+    [rows, cols, test, row, col, m1 ,m2],
+	m1 : to_matrix(matrix),
+    m2 : copymatrix(m1),
+    rows : length(m2),
+	cols : length(m2[1]),
+    test : true,
+	test : check_row_echelon(m2),
+	
+	if test = false then return(false),
+	
+	for i:1 thru rows do (
+	    row : m2[i],
+		if find_first_non_zero_member(row) <= length(row) then ( 
+		   
+		   test : check_first_element_of_one(row),
+           if test = false then return(test),
+		   j : find_first_non_zero_member(row),
+		   col : get_matrix_column (m2 , j),
+		   test : is_all_zero_except (col , i),
+		   if test = false then return(test)
+		)	
+	),
+	return(test)  
+);
+ 
+check_permutation(matrix) := block(
+   [rows, cols, test, col, row, index , m1 , m2],
+   m1 : to_matrix(matrix),
+   m2 : copymatrix(m1),
+   rows : length(m2),
+   cols : length(m2[1]),
+   test : true,
+   
+   for i:1 thru cols do (
+       col : get_matrix_column (m2, i),
+	   index : find_first_non_zero_member(col),
+	   if check_first_element_of_one(col) = false then ( 
+	      test : false,
+		  return(test)
+	   ),
+	   if is_all_zero_except(col , index) = false then (
+	      test : false,
+		  return(test)
+	   )
+   ),
+   for i:1 thru rows do (
+       row : m2[i],
+	   index : find_first_non_zero_member(row),
+	   if check_first_element_of_one(row) = false then ( 
+	      test : false,
+		  return(test)
+	   ),
+	   if is_all_zero_except (row , index) = false then (
+	      test : false,
+		  return(test)
+	   )
+   ), 
+   return(test)
+
+);
+
+check_elementary(matrix) := block(
+    [type, m1 , m2],
+	m1 : to_matrix(matrix),
+    m2 : copymatrix(m1),
+    type : 0,
+    if is_elementry_type1(m2) = true then type : 1,
+	if is_elementry_type2(m2) = true then type : 2,
+	if is_elementry_type3(m2) = true then type : 3,
+	
+	type
+);
+
+/* --------- Question 2 ~ b --------- */
+random_lowertriangular(n,x) := block(
+    [result],
+    result : zeromatrix(n, n), 
+    for i:1 thru n do (
+        for j:1 thru i do (
+            if integerp(x) = true then result[i][j] : random(2 * x + 1)- x
+            else result[i][j] : random(2 * x + 1) - x
+        )
+    ),
+    return(result)
+);
+
+random_invertible(n, x) := block(
+    [result, determinant],
+	
+    while true do (
+        result : apply('matrix , makelist(makelist(random(2*x + 1)- x, j, 1, n), i, 1, n)),
+        determinant : determinant(result),
+        if determinant # 0 then return(result)
+    )
+);
+
+random_permutation(n) := block(
+    [result, p, temp, index],
+    result : zeromatrix(n, n), 
+    p : create_list(i, i, 1, n),
+    
+    for i:1 thru n do (
+        index : random(n - i + 1) + i,  
+        temp : p[i], 
+        p[i] : p[index],
+        p[index] : temp
+    ),
+    
+    for i:1 thru n do (
+        result[i][p[i]] : 1
+    ),
+    
+    return(result)
+);
+
+random_reduced_row_echelon(m, n, x) := block(
+    [mat, rand, lead , num],
+    mat : zeromatrix(m,n),
+	lead : [],
+
+	for i:1 thru min(m,n) do (
+	    lead : endcons(random(n + 1) , lead)
+	),
+	
+	lead : delete_element_formul(lead),
+	lead : sort(lead),
+	
+	i : 1,
+	if i <= m then (
+	   for j:2 thru length(lead) do(
+	      mat[i][lead[j]] : 1,
+		  
+		   for k:lead[j]+1 thru n do (
+             if is_element_in_my_list(k , lead) = false then (
+			    mat[i][k] : random(2*x+1) - x
+		     ) 
+           ),
+		   i : i + 1  
+        ) 
+	),
+   mat 
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* --------- method 3  --------- */
+horizontal_join(M1, M2) := block(H: M1, M3: transpose(M2),
+  if length(M1) = length(M2) then (
+    for i:1 thru length(M3) do
+      H: addcol(H, transpose(M3[i]))
+  )
+  else H: false, H)$
+
+vertical_join(M1, M2) := block(V: M1,
+  if length(M1)=0 then (
+    for i:1 thru length(M2) do
+      V: addrow(V, M2[i])
+  )
+  else (
+    if length(M1[1]) = length(M2[1])  then (
+      for i:1 thru length(M2) do
+        V: addrow(V, M2[i])
+    )
+    else V: false)
+  , V)$ 
+
+join_matrices(L1, L2) := block(J: to_matrix(L2[1]),
+  for i:2 thru length(L2) do
+    if (matrixp(J) and length((L1[i])[1]) = length((L2[i])[1]) ) then J: horizontal_join(J, to_matrix(L2[i]))
+    else block(
+      J: false, i:length(L2)
+    )
+  , J)$
+
+/* --------- Question 3 ~ a --------- */
+block_matrix(L):= block(M: zeromatrix(0,0),
+  for i:1 thru length(L) do 
+    if matrixp(M) then block(
+      M2: join_matrices(L[1], L[i]),
+      if matrixp(M2) then M: vertical_join(M, M2)
+      else block(M: false, i: length(L))) 
+    else block(M: false, i: length(L))
+  , M)$
+  
+/* --------- Question 3 ~ b --------- */
+block_diagonal_matrix(L) := block(D: matrix(), x:0,
+  for i:1 thru length(L) do
+    x: x+length(L[i][1]),
+   backx:0, frontx: x,
+  for i:1 thru length(L) do block(
+    y: length(L[i]), 
+    frontx: frontx-length(L[i][1]),
+    D1: zeromatrix(y, backx), 
+    D2: zeromatrix(y, frontx), 
+    backx: backx+length(L[i][1]),
+    D3: horizontal_join(D1, to_matrix(L[i])), D3: horizontal_join(D3, D2),
+    D: vertical_join(D, D3)
+  )
+  , D)$
+
+
+
+
+
+
+
+
+
+
+
+/* --------- method 4  --------- */
+triangular_multiply(M, N, is_upper) := block(
+    [A, n],
+    n: length(M[1]),
+    
+    if n # length(N) then return([]),
+    A: makelist(makelist(0, j, 1, n), i, 1, n),
+    
+    for i: 1 thru n do (
+        for j: 1 thru n do (
+            if is_upper and i > j then j: i
+            else if not is_upper and i < j then break,
+            for k: 1 thru length(N) do (
+                A[i][j]: A[i][j] + M[i][k] * N[k][j]
+            )
+        )
+    ),
+    A
+);
+
+inverse_2(M, line) := block(
+    [M_line, n],
+    n: length(M),
+    M_line: makelist(makelist(if i=j then 1 else 0, j, 1, n), i, 1, n),
+    if line >= 1 and line <= n then (
+        for i: 1 thru n do (
+            M_line[line][i]: -M[line][i]
+        ),
+        M_line[line][line]:1 
+    ),
+    return(M_line)
+);
+
+/* --------- Question 4 ~ a --------- */
+triangular_inverse(matrix) := block(
+    [is_upper: false, yekke, ans, i, j,b , a , r],
+	r : to_matrix(matrix),
+	a : copymatrix(r),
+    
+    for i: 1 thru length(a) do (
+        for j: 1 thru length(a[1]) do (
+            if i # j and a[i][j] # 0 then (
+                if i < j then is_upper: true,
+                break
+            )
+        )
+    ),
+    yekke: makelist(makelist(if i=j then 1/a[i][i] else 0, j, 1, length(a[1])), i, 1, length(a)),
+
+    for i: 1 thru length(a) do (
+        if a[i][i] # 0 then (
+            if is_upper then (
+                for j: i thru length(a[1]) do (
+                    a[i][j]: a[i][j] * yekke[i][i]
+                )
+            ) else (
+                for j: 1 thru i do (
+                    a[i][j]: a[i][j] * yekke[i][i]
+                )
+            )
+        )
+    ),
+    
+    ans: inverse_2(a, -1),
+
+    if is_upper then (
+        for i: length(a)-1 step -1 thru 1 do (
+            b:inverse_2(a, i),
+            ans: triangular_multiply(ans,b , is_upper),
+            a:triangular_multiply(a,b,is_upper)
+            
+        )
+    ) else (
+        for i: length(a) step -1 thru 2 do (
+             b:inverse_2(a, i),
+            ans: triangular_multiply(ans, inverse_2(a, i), is_upper),
+            a:triangular_multiply(a,b,is_upper)
+        )
+    ),
+    ans: triangular_multiply(ans, yekke, is_upper),
+    to_matrix(ans)
+);
+	
+/* --------- Question 4 ~ b --------- */
+triangular_det(a) := block(
+    [i, ans: 1, n , M , r],
+	r : to_matrix(a),
+	M : copymatrix(r),
+    n: length(M), 
+    for i: 1 thru n do (
+            ans: ans * M[i][i],  
+            if is(ans =  0) then (
+                 return(0)
+            )
+        ),
+    
+     return(ans)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+/*Question 5 --------------------------------------------------------------------------- */
+
+/*swap row i with j*/
+swap_row(M, i, j) := block (                
+L: M[i],
+M[i]: M[j],
+M[j]: L,
+M
+);
+
+/*add k times row j to row i */
+add_row(M, i, j, k) := block(
+M[i]: M[i] + k * M[j],
+M
+);
+
+/*multiply row i by scalar k*/
+multiply_row(M, i, k) := block(
+M[i]: k * M[i],
+M
+);
+
+/*Question 5, A --------------------------------------------------------------------- */
+
+/*defining function*/
+gauss_row_echelon(B) := block(
+[B: to_matrix(B), P, E: [], n: length(B), m: length(B[1]), i, j, pivot, factor, det_factor:1 , A] ,   /*n: Num rows*/  /*E: elementary matrices list*//*P: result matrices list*/
+A: copymatrix(B),
+P: [copymatrix(A)],
+    
+  /*finding pivot row*/ 
+for i:1  thru min(n,m) do (
+        pivot: i,
+        while pivot <=n and A[pivot][i] = 0  do pivot: pivot +1 ,
+        if pivot > n then continue,
+        
+        if pivot <=n then (
+            if pivot > i then (
+        A: swap_row(A, i, pivot),
+        det_factor: -det_factor,
+        E: endcons(ident(n), E),    /*endcons: appends an element to the end of a list*/            
+        E[length(E)]: swap_row(E[length(E)], i, pivot),       /*elementary matrix for swap*/
+        P: endcons(copymatrix(A), P)       
+)
+        ),
+
+/*Eliminating blew rows*/
+for j:i+1  thru n do (
+   if A[j][i] # 0 and A[i][i] # 0  then (
+                factor: -A[j][i]/A[i][i],
+                    A: add_row(A, j, i, factor),
+                    E: endcons(ident(n), E),
+                    E[length(E)]: add_row(E[length(E)], j, i, factor),
+                    P: endcons(copymatrix(A), P)
+                ) 
+            )
+        ),
+        [P, E]
+    );
+
+/*Question 5, B --------------------------------------------------------------------- */
+
+/*defining function*/
+gauss_jordan(B) :=  block(
+    [B: to_matrix(B), P, E: [], n: length(B), m: length(B[1]), i, j, pivot, factor, A],
+    A: copymatrix(B),
+    P: [copymatrix(A)],
+    /*finding pivot row*/
+    for i:1  thru min(n,m) do (
+        pivot: i,
+        while pivot <=n and A[pivot][i] = 0  do pivot: pivot +1 ,
+        if pivot > n then continue,
+        
+        /*swap rows*/
+       if pivot<=n then (
+            if pivot > i then (
+        A: swap_row(A, i, pivot),
+        E: endcons(ident(n), E),               
+        E[length(E)]: swap_row(E[length(E)], i, pivot),       
+        P: endcons(copymatrix(A), P)       
+)
+        ),
+        
+         /* scale pivot to 1 */
+        if A[i][i] # 1  and A[i][i] #0  then (
+        factor: 1 /A[i][i],
+        A: multiply_row(A, i, factor),
+        E: endcons(ident(n), E),
+        E[length(E)]: multiply_row(E[length(E)], i, factor),
+        P: endcons(copymatrix(A), P)
+        ),
+        
+        /*Eliminating blew and above rows*/
+        for j:1  thru n do (
+        if j#i  and  A[j][i]#0  and A[i][i]#0 then (
+            factor: -A[j][i]/A[i][i],
+            A: add_row(A, j, i, factor),
+            E: endcons(ident(n), E),
+            E[length(E)]: add_row(E[length(E)], j, i, factor),
+            P: endcons(copymatrix(A), P)
+                )
+            )
+        ),
+    [P, E]
+    );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*Question6 -----------------------------------------------------*/
+
+/*delete row and col*/
+remove(M, i, j) := block( 
+    [rows, cols],
+    
+    M: to_matrix(M),
+    
+    rows: copylist(args(M)),
+    rows: delete(rows[i], rows, 1 ),    /*remove ith row*/
+    if rows = [] then return(matrix()),
+    M: apply('matrix, rows),
+    
+    M: transpose(M),
+    cols: copylist(args(M)),
+    cols: delete(cols[j], cols, 1 ),
+     if cols = [] then return(matrix()),
+           
+    apply('matrix, cols)
+);
+
+/*Question6, A ----------------------------------------------------------------------*/
+
+det1(A):= block([A: to_matrix(A), P, E, det_factor:1 , Pk],
+[P, E]: gauss_row_echelon(A),
+
+    for i:1  thru length(E) do (
+    det_factor: det_factor / triangular_det(E[i])
+    ),
+Pk: last(P),
+    
+    det_factor: det_factor * triangular_det(Pk)
+);
+
+/*Question6, B ---------------------------------------------------------------------*/
+
+/*defining function*/
+det2(A):=block(
+    [A: to_matrix(A), n: length(A), j, submax, sum:0 ],
+    
+    if n=1  then return (A[1][1]),
+    if n=2 then return (A[1][1]*A[2 ][2]-A[1][2]*A[2][1]),
+    
+    for j:1  thru n do (
+    submax: remove(A, 1, j),               /*removing row1 & col j*/
+     submax: to_matrix(submax),
+        sum: sum + (-1)^(1+j) * A[1][j] * det2(submax)
+        ),
+    
+    return (sum)
+    );
+
+/* Question6, C ------------------------------------------------------------------ */
+
+/*comparing times*/
+CompareTime(A):= block([A: to_matrix(A), t1, t2, d1, d2],
+
+t1: elapsed_real_time(),
+d1: det1(A),
+t1: elapsed_real_time()-t1,
+    
+t2: elapsed_real_time(),
+d2: det2(A),
+t2: elapsed_real_time()-t2,
+
+print("det1 time: ", t1, "s"),
+print("det2 time: ", t2, "s")
+);
+
+
+
+
+
+
+
+
+
+/* --------- method 7  --------- */
+diagonal_inverse(D) := block(
+  [M], M: ident(length(D)),
+  for i: 1 thru length(D) do
+    M[i, i]: 1/D[i, i],
+  M)$
+
+is_zero(L) := block(
+  [b], b: true,
+  for i: 1 thru length(L) do
+    if L[i] # 0 then b: false,
+  b)$
+
+minor(A, i, j) := block(
+  [M, M1, M2, M3, M4, L1, L2, L],
+  L1:[], L2:[], L:[],
+  M1: zeromatrix(i-1, j-1),
+  for m: 1 thru i-1 do
+    for n:1 thru j-1 do
+      M1[m,n]: A[m,n],
+  M2: zeromatrix(i-1, length(A[1])-j),
+  for m: 1 thru i-1 do
+    for n: 1 thru length(A[1])-j do
+      M2[m,n]: A[m,n+j],
+  M3: zeromatrix(length(A)-i, j-1),
+  for m:1 thru length(A)-i do
+    for n:1 thru j-1 do
+      M3[m,n]: A[m+i,n],
+  M4: zeromatrix(length(A)-i, length(A[1])-j),
+  for m:1 thru length(A)-i do
+    for n:1 thru length(A[1])-j do
+      M4[m,n]: A[m+i,n+j],
+  if length(M1) # 0 then
+    L1: append(L1, [M1]),
+  if length(M2) # 0 then
+    L1: append(L1, [M2]),
+  if length(M3) # 0 then
+    L2: append(L2, [M3]),
+  if length(M4) # 0 then 
+    L2: append(L2, [M4]),
+  if length(L1) # 0 then
+    L: append(L, [L1]),
+  if length(L2) # 0 then
+    L: append(L, [L2]),
+  M: block_matrix(L),
+  M)$
+
+CompareFunctions(A):= block([A: to_matrix(A), t1, t2, m1, m2],
+
+t1: elapsed_real_time(),
+m1: inverse1(A),
+t1: elapsed_real_time()-t1,
+    
+t2: elapsed_real_time(),
+m2: inverse2(A),
+t2: elapsed_real_time()-t2,
+
+print("inverse1 time: ", t1, "s"),
+print("inverse2 time: ", t2, "s")
+);
+
+/* --------- Question 7 ~ a --------- */
+inverse1(A) := block(
+  [M, P1, E1, g1, g2, P2, E2, p], A: to_matrix(A), M: ident(length(A)),
+  g1: gauss_row_echelon(copymatrix(A)), P1: g1[1], E1: g1[2], p: P1[length(P1)],
+     if is_zero(p[length(p)]) then
+      M: false
+    else (
+      g2: gauss_row_echelon(transpose(p)), P2: g2[1], E2: g2[2],
+      for i: 1 thru length(E2) do
+        M: M.transpose(E2[i]),
+      M: M.diagonal_inverse(P2[length(P2)]),
+      i: length(E1),
+      while i # 0 do (
+        M: M.E1[i],
+        i: i-1)
+      ),
+  M)$ 
+
+/* --------- Question 7 ~ b --------- */ 
+adjugate(A) := block(
+  [M], A: to_matrix(A), M: zeromatrix(length(A), length(A[1])),
+  if length(A) = 1 then M: ident(1)
+  else (
+    for i: 1 thru length(A) do
+      for j:1 thru length(A[1]) do
+        M[i,j]: (-1)^(i+j)*det1(minor(A,i,j))),
+  M)$
+
+/* --------- Question 7 ~ c --------- */ 
+inverse2(A) := block(
+  [M1, det, adjugate], A: to_matrix(A), det: det1(copymatrix(A)),
+  if det = 0 then
+    M1: false
+  else  (
+    adjugate: adjugate(A),
+    M1: 1/det*transpose(adjugate)),
+  M1)$
+ 
+
+
+
+
+
+
+
+
+
+
+/* --------- method 8  --------- */
+find_last_non_zero_member(list) :=  block (
+   [index],
+   index : length(list),
+   while index>=1 and list[index] = 0 do(
+      index : index - 1 
+    ),
+    return(index)
+);
+
+generate_elementry_type2 (n , row, col, amount) := block(
+     [result],
+	 result : zeromatrix(n, n),
+	 
+	 for i:1 thru n do (
+	     result[i][i] : 1
+	 ),
+	 
+	 result[row][col] : amount,
+	 return(result)
+	 
+);
+
+generate_elementry_type1 (n , row, amount) := block(
+     [result],
+	 result : zeromatrix(n, n),
+	 
+	 for i:1 thru n do (
+	     result[i][i] : 1
+	 ),
+	 
+	 result[row][row] : amount,
+	 if amount = 0 then return(false),
+	 return(result)
+	 
+);
+
+get_elementry2_zero_col(matrix ,row, col) := block (
+    [E , pivot , matrix_col],
+	E : [],
+	pivot : matrix[row][col],
+	matrix_col : get_matrix_column(matrix ,col),
+	
+	
+	for i:(row+1) thru length(matrix) do (/*-1*/
+	    if matrix_col[i] # 0 then (
+		   
+		   zarib : (matrix_col[i] / pivot) * -1,
+		   E : endcons (generate_elementry_type2(length(matrix), i, row, zarib) , E)
+		   
+		)
+	),
+	return(E)
+);
+
+get_elementry2_zero_row_left(matrix,row, col) := block (
+    [E, pivot, matrix_row , zarib],
+    E : [],
+	pivot : matrix[row][col],
+	matrix_row : matrix[row],
+	
+	for i:1 thru col-1 do (
+	    if matrix_row[col - i] # 0 then (
+		   
+		   zarib : (matrix_row[col - i] / pivot) * -1,
+		   E : endcons(generate_elementry_type2(length(matrix), col, col - i, zarib), E)
+		   
+		)
+
+	),
+	return(E)
+);
+
+multi_element_of_list(list) := block (
+   [p],
+   
+   if length(list) # 0 then(
+   p : list[1],
+      if length(list) > 1 then (
+         for i:2 thru length(list) do(
+            p : p. list[i]
+         )
+        )
+   ),
+   return(p)
+);
+ 
+get_elementry1_matrix(matrix) := block (
+   [E, zarib],
+   E : [],
+   j : 0,
+   
+   for i:1 thru length(matrix) do (
+       
+	   j : find_last_non_zero_member(matrix[i]),
+	   zarib : 1 / matrix[i][j] ,
+	   E : endcons(generate_elementry_type1(length(matrix) , i, zarib), E)
+	   
+   ),
+   return(E)
+);
+
+get_elementry2_zero_row_right(matrix,row, col) := block (
+    [E, pivot, matrix_row , zarib],
+    E : [],
+	pivot : matrix[row][col],
+	matrix_row : matrix[row],
+	
+	for i:col + 1 thru length(matrix) do (
+	    if matrix_row[i] # 0 then (
+		   
+		   zarib : (matrix_row[i] / pivot) * -1,
+		   E : endcons(generate_elementry_type2(length(matrix), col, i, zarib), E)
+		   
+		)
+
+	),
+	return(E)
+);
+
+/* --------- Question 8 ~ a --------- */
+lpl(m) := block(
+    [E, Ep, j, Epp , m0, m1 ,test , test1, p , result, l , lp , matrix],
+	matrix : to_matrix(m),
+    E : [],
+	Ep: [],
+	Epp : [],
+	j : 0,
+	p : copymatrix(matrix),
+	m0 : copymatrix(matrix),
+	m1 : m0,
+	test : [],
+	test1 : [],
+	
+	E : endcons(ident(length(matrix)) , E),
+	Ep : endcons(ident(length(matrix)) , Ep),
+	
+	for i:1 thru length(matrix) do (
+	    
+		j : find_last_non_zero_member(m0[i]),
+		test : get_elementry2_zero_col(m0, i , j),
+		for k:1 thru length(test) do (
+			
+			E : endcons(test[k], E),
+			m0 : test[k]. m0
+
+		),
+		test1 : get_elementry2_zero_row_left(m0, i , j),
+		for a:1 thru length(test1) do (
+		    
+			Ep : endcons(test1[a], Ep),
+			m0 :  m0. test1[a]
+			
+		)		
+	),
+	
+	Epp : get_elementry1_matrix(m0),
+	for i:1 thru length(Epp) do (
+	    m0 : Epp[i].m0
+	),
+	p : m0,
+	result : [], 
+	E : append(E, Epp),
+	result : endcons(E , result),
+	result : endcons(Ep , result),
+	l : multi_element_of_list(reverse(E)),
+	lp : multi_element_of_list(Ep),
+	result : endcons([inverse1(l) , p , inverse1(lp)] , result),
+	return(result)
+);
+
+/* --------- Question 8 ~ b --------- */
+lpu(m) := block(
+    [E, Ep, j, Epp , m0, m1 ,test , test1, p , result, l , lp, matrix],
+	matrix : to_matrix(m),
+    E : [],
+	Ep: [],
+	Epp : [],
+	j : 0,
+	p : copymatrix(matrix),
+	m0 : copymatrix(matrix),
+	m1 : m0,
+	test : [],
+	test1 : [],
+	
+	E : endcons(ident(length(matrix)) , E),
+	Ep : endcons(ident(length(matrix)) , Ep),
+	
+	for i:1 thru length(matrix)-1 do (
+		j : find_first_non_zero_member(m0[i]),
+		test : get_elementry2_zero_col(m0, i , j),
+		
+		for k:1 thru length(test) do (
+			E : endcons(test[k], E),
+			m0 : test[k]. m0
+		),
+		 
+		test1 : get_elementry2_zero_row_right(m0, i , j),
+		for a:1 thru length(test1) do (
+		
+			Ep : endcons(test1[a], Ep),
+			m0 :  m0. test1[a]
+		)
+	),
+	Epp : get_elementry1_matrix(m0),
+	for i:1 thru length(Epp) do (
+	    m0 : Epp[i].m0
+	),
+	p : m0,
+	result : [], 
+	E : append(E, Epp),
+	result : endcons(E , result),
+	result : endcons(Ep , result),
+	l : multi_element_of_list(reverse(E)),
+	lp : multi_element_of_list(Ep),
+	result : endcons([inverse1(l) , p , inverse1(lp)] , result),
+	return(result)
+);
+
+/* --------- Question 8 ~ b --------- */
+inverse3(a):= block(
+[LPL ,l ,P ,Lp, result, n:length(a) , M],
+     M : to_matrix(a),
+    result: zeromatrix(n,n),
+    LPL : lpl(M)[3],
+   
+    Lp : triangular_inverse(LPL[3]),
+    P : inverse1( LPL[2]),
+    l : triangular_inverse(LPL[1]),
+   
+    result: Lp . P,
+    result: result . l ,     
+    
+    result
+
+);
+
+
+
+
+
+
+
+
+
+
+
+
+/* --------- method 9  --------- */
+is_lower(M):= block(
+[n:length(M)],
+    for i:1 thru n do (
+        for j:i+1 thru n do(
+            if M[i][j]#0 then(
+                false
+            )
+        )
+    ),
+    true
+);
+
+to_list(M):= block(
+[list:[],rows: length(M), cols: length(first(M)) ],
+    if matrixp(M) then(
+            for i: 1 thru rows do (
+                    list: endcons(args(M[i]), list)
+            ),
+        list
+    )else(
+        M
+    )  
+);
+
+multiply_list_matrices(A, B) := block(
+    [result: [], m: length(A), n: length(first(A)), p: length(first(B)),row,sum],
+   for i: 1 thru m do (
+        row: [],
+        for j: 1 thru p do (
+            sum: 0,
+            for k: 1 thru n do (
+                sum: sum +A[i][k] * B[k][j]
+            ),   
+            row: endcons(sum, row)
+        ), 
+        result: endcons(row, result)
+    ),
+    result
+);
+
+/* --------- Question 9 --------- */
+plu(A) := block(
+    [P, L, U, Q, E: [], E1: [], E2: [], n: length(A), i, j, pivot, factor: 0, e],
+    
+    A: to_list(A),
+    U: copylist(map(copylist, A)),
+    P: ident(n),
+    L: ident(n),
+
+    for i: 1 thru n do (
+        pivot: i,
+        while pivot <= n and A[pivot][i] = 0 do (
+            pivot: pivot + 1
+        ),
+        if pivot > n then continue,
+        if pivot <= n and pivot > i then (
+            A: swap_row(A, i, pivot),
+            P: swap_row(P, i, pivot)
+        ),
+        for j: i+1 thru n do (
+            if A[j][i] # 0 and A[i][i] # 0 then (
+                factor: -A[j][i] / A[i][i],
+                A[j]: A[j] + factor * A[i]
+            )
+        )
+    ),
+
+    U: multiply_list_matrices(to_list(P), U),
+
+    for i: 1 thru n do (
+        for j: i+1 thru n do (
+            if U[j][i] # 0 and U[i][i] # 0 then (
+                factor: -U[j][i] / U[i][i],
+                U[j]: U[j] + factor * U[i],
+                L[j][i]: -factor
+            )
+        )
+    ),
+
+    Q: P.transpose(to_matrix(A)),
+
+    E: gauss_jordan(Q)[2],
+
+    i: 1,
+    e: length(E),
+
+    while i <= e and is_lower(E[i]) do (
+        E1: endcons(E[i], E1),
+        i: i + 1
+    ),
+
+    if i > e then (
+        E2: endcons(ident(n), E2)
+    ),
+
+    while i <= e do (
+        E2: endcons(E[i], E2),
+        i: i + 1
+    ),
+
+    [E1, E2, [transpose(P), L, to_matrix(U)]]
+);

@@ -1,0 +1,1139 @@
+/*MadMax
+	Nadia Afsar: nadiaafsar383@gmail.com
+	Roya Zeraati: roya.zeraati93@gmail.com
+	Sara Mohammadi Mohammadi: saradoublemohammadi@gmail.com
+	Mahdieh Yazdan Panah: mahdieh.yazdanpanah83@gmail.com
+*/
+
+
+
+
+/*HW3|Question1 ------------------------------*/
+
+/*Helper Functions ---------------------------*/
+to_matrix(M):= if matrixp(M) then M else apply('matrix, M)$
+
+/*swap row i with j*/
+swap_row2(M, i, j):= block(
+  L: M[i],
+  M[i]: M[j],
+  M[j]: L,
+  M
+)$
+
+/*add k times row j to row i */
+add_row2(M,i,j,k):= block(
+  M[i]: mod(M[i] + k.M[j], 2),
+  M
+)$
+
+/*multiply row i by scalar k*/
+multiply_row2(M, i, k):= block(
+  M[i]: mod(k.M[i], 2),
+  M
+)$
+
+/*defining function*/
+gauss_jordan2(A):= block(
+  [A: to_matrix(A), P, E:[], n: length(A), m:length(A[1]), i:1, j, k:1, pivot, factor],
+  P: [copymatrix(A)],
+  while i <= n and k <= m do (
+    /*finding pivot row*/
+    pivot: i,
+    while pivot <= n and A[pivot][k] = 0 do pivot: pivot + 1,
+    if pivot > n then continue,
+    if pivot <= n then (
+      /*swap rows*/
+      if pivot > i and A[i][k] = 0 then (
+        A: swap_row2(A, i, pivot),
+        E: endcons(ident(n), E),
+        E[length(E)]: swap_row2(E[length(E)], i, pivot),
+        P: endcons(copymatrix(A), P)
+      ),
+      /*scale pivot to 1*/
+      if A[i][k] # 1 and A[i][k] # 0 then (
+        factor: mod(1 / A[i][k], 2),
+        A: multiply_row2(A, i, factor),
+        E: endcons(ident(n), E),
+        E[length(E)]: multiply_row2(E[length(E)], i, factor),
+        P: endcons(copymatrix(A), P)
+      ),
+      /*Eliminating below and above rows*/
+      for j: 1 thru n do (
+        if j # i and A[j][k] # 0 and A[i][k] # 0 then (
+          factor: mod(-A[j][k] / A[i][k], 2),
+          A: add_row2(A, j, i, factor),
+          E: endcons(ident(n), E),
+          E[length(E)]: add_row2(E[length(E)], j, i, factor),
+          P: endcons(copymatrix(A), P)
+        )
+      ),
+      i: i + 1
+    ),
+    k: k + 1
+  ),
+  [P, E]
+)$
+
+list_to_matrix(L):= block([n, m, M],
+  if listp(L) then (
+    n: length(L),
+    if n > 0 then (
+      m: length(L[1]),
+      M: zeromatrix(n, m),
+      for i: 1 thru n do (
+        for j: 1 thru m do (
+          M[i][j]: L[i][j]
+        )
+      ),
+      L: M
+    )
+  ),
+  L
+)$
+
+to_list(M):= block(
+  [list: [], rows: length(M)],
+  if matrixp(M) then (
+    for i: 1 thru rows do (
+      list: endcons(args(M[i]), list)
+    ),
+    list
+  ) else (
+    M
+  )
+)$
+
+to_column_list(M):= block(
+  [list: [], rows: length(M), j],
+  if matrixp(M) then (
+    for i: 1 thru rows do (
+      list: endcons(args(M[i]), list)
+    ),
+    list
+  ) else (
+    list: makelist([0], j, 1, rows),
+    for i: 1 thru rows do (
+      list[i][1]: M[i]
+    ),
+    list
+  )
+)$
+/*Solving Equation Ax=b -------------------*/
+particular_solution(A, b):= block(
+  [A_list: to_list(A), b: to_column_list(b), E: [], n: length(A), m: 0, size, i: 0, j: 0, pivot, line0, found: false, x, B],
+  if not (n = 0) and n = length(b) and length(b[1]) = 1 then (
+    m: length(A_list[1]),
+    size: max(m + 1, n),
+    /* B := [A | -b] */
+    B: makelist(makelist(0, j, 1, m + 1), i, 1, size),
+    for i: 1 thru n do (
+      for j: 1 thru m do (
+        B[i][j]: A[i][j]
+      ),
+      B[i][m + 1]: mod(-b[i][1], 2)
+    ),
+    /* reduced row echelon */
+    E: gauss_jordan2(B),
+    B: E[1][length(E[1])],
+    /* move pivots to diagonal */
+    for i: 1 thru n do (
+      pivot: 1,
+      j: n - i + 1,
+      while pivot <= m + 1 and not B[j][pivot] = 1 do (
+        pivot: pivot + 1
+      ),
+      if pivot <= m + 1 and not pivot = j then (
+        B: swap_row2(B, pivot, j)
+      )
+    ),
+    /* -I */
+    for i: 1 thru m + 1 do (
+      B[i][i]: mod(B[i][i] - 1, 2)
+    ),
+    /* particular solution */
+    x: makelist([0], j, 1, m),
+    for i: 1 thru size do (
+      if not found and not B[m + 1][i] = 0 then (
+        for j: 1 thru m do (
+          x[j][1]: B[j][i] / B[m + 1][i]
+        ),
+        found: true
+      )
+    ),
+    if found then (
+      list_to_matrix(x)
+    ) else (
+      false
+    )
+  ) else (
+    false
+  )
+)$
+
+/*Building Column Matrix -----------------*/
+matrix_to_column(M):= transpose(matrix(flatten(args(M))))$
+
+/*Defining Column Matrix b ---------------*/
+difference(S, T):= block([CS, CT],
+  CS: matrix_to_column(S),
+  CT: matrix_to_column(T),
+  mod(CT - CS, 2)
+)$
+
+/* Defining Effect Matrix A --------------- */
+Effect_matrix(n):= block([A: zeromatrix(n^2, n^2), i, j, k],
+  for i: 1 thru n do
+    for j: 1 thru n do (
+      k: n.(i - 1) + j,
+      /* cell itself */
+      A[k, k]: 1,
+      /* left neighbor */
+      if j > 1 then A[n.(i - 1) + (j - 1), k]: 1,
+      /* right neighbor */
+      if j < n then A[n.(i - 1) + (j + 1), k]: 1,
+      /* up neighbor */
+      if i > 1 then A[n.(i - 2) + j, k]: 1,
+      /* down neighbor */
+      if i < n then A[n.i + j, k]: 1
+    ),
+  A
+)$
+
+/*Defining Asked Function-----------------------*/
+reach_target_state(S, T):= block(
+  [n, A, b, sol, list, i, j],
+  n: length(S),
+  A: Effect_matrix(n),
+  b: difference(S, T),
+  sol: particular_solution(A, b),
+  if sol = false then return(false),
+  list: [],
+  for i: 1 thru n do
+    for j: 1 thru n do (
+      if is(sol[(i - 1).n + j][1] = 1) then
+        list: endcons([i, j], list)
+    ),
+  list
+)$
+/*توضیح روش: تمام درایه‌های ماتریس را به ترتیب از 1 تا n^2 شماره‌گذاری می‌کنیم (از سطر اول شروع می‌کنیم تا اخرین درایه سطر و بعد سطر بعدی و ...) آنگاه درایه متناظر با آنها را در یک ماتریس ستونی n^2 قرار میدهیم، و یک ماتریس ستونی صفر میسازیم. اگر درایه (i,j) را انتخاب کرده باشیم، درایه متناظر با آن را در ماتریس ستونی، یک قرار میدهیم.
+ماتریس ستونی x، ماتریسی است که تمام انتخاب های ما را نشان میدهد (اگر درایه ای زوج بار انتخاب شده باشد=0 و اگر فرد بار=1)
+ماتریس Effect در ماتریس ستونی x اثر میکند و ماتریس خروجی b را میدهد که برابر است با تفاضل ماتریس ستونی ساخته شده از ماتریس نهایی (تغییر یافته بعد از انتخاب درایه ها) و ماتریس ستونی ساخته شده از ماتریس اولیه (قبل از تغییر). (منظورمان از ماتریس ستونی ساخته شده، ماتریس ستونی است که درایه های آن برابر با درایه های متناظر با آن در ماتریس اصلی است یعنی 0 یا 1)
+الگوریتم درایه متناظر در ماتریس ستونی با ماتریس اصلی: به درایه (i, j) عدد k=n*(i-1) +j را نسبت می‌دهیم.
+اگر معادله Ax=b جواب نداشته باشد، جواب False خواهد بود و اگر داشته باشد میتوان لیست مختصات انتخابی را از ماتریس x بدست آورد.
+شیوه ساخت ماتریس A: درایه (i, j) را انتخاب میکنیم. ستون k=n*(i-1) +j را در نظر میگیرم. در آن ستون، سطرهایی متناظر با عدد همسایه های درایه انتخابی را پیدا میکنیم و در آن خانه ها، یک میگذاریم. (در واقع درایه های (r, k) که در آن k=n*(i-1) +j و r={n*(i-1) +(j-1), n*(i-1) +(j+1), n*(i-2) +(j), n*(i) +(j)}
+با این شرط که همسایه درایه منتخب موجود باشد.) حال این کار را به ازای تمام (i, j) ها انجام می‌دهیم تا ماتریس Effect ساخته شود. با ضرب این ماتریس در ماتریس x، تغییرات اعمال می‌شود.
+یک بررسی ساده: درایه (i, j) را انتخاب کردیم پس در سطر kام ماتریسx عدد یک را قرار میدهیم و بقیه صفر. وقتی Ax را محاسبه میکنیم فقط به ستون kام ماتریس A نیاز داریم و ماتریس b، سطرهای r آن یک می باشد که متناظر است با تغییرات درایه های همسایه درایه (i, j)
+درادامه با حل معادله در میدان F2 و یافتن جواب خصوصی، خواسته مسئله را بدست می‌آوریم.*/
+
+/*HW3|Question2 ------------------------------*/
+
+/*Helper Functions ---------------------------*/
+trace(A):= block(
+  [n, t:0, i],
+  n : length(A),
+  for i from 1 thru n do (
+    t : t + A[i,i]
+    ),
+    t
+)$
+
+/*Q2~a----------------------------------*/
+charpoly_adj(A, x) := block(
+  [n, C, a, polynomial, i:0, adjugate, temp],
+  n : length(A),
+    if n=0 then (
+    [null , 1]
+    )else (
+  C : ident(n),
+  temp : x^n,
+  polynomial : [temp],
+    
+  while i<n -1 do (
+    i: i+1,
+    temp : temp/x,
+    C : A . C,
+    a : - trace(C) / i,
+    polynomial : endcons(a*temp, polynomial),
+    C: C + a * ident(n)
+  ),
+  adjugate : C ,
+ if n%2 = 0 then (
+            adjugate: -C
+),
+  a:-trace(A.C)/n,
+ polynomial : endcons(a, polynomial),
+  [adjugate, polynomial]
+)
+)$
+
+/*Q2~b---------------------------------*/
+charpoly1(A) := block(
+ [n, a, polynomial, i:0, C, temp],
+  n : length(A),
+  temp : x^n,
+  polynomial : [temp],
+  C : ident(n),
+ while i<n  do (
+    i: i+1,
+    temp : temp/x,
+    C : A . C,
+    a : - trace(C) / i,
+    polynomial : endcons(a*temp, polynomial),
+    C: C + a * ident(n)
+  ),
+  polynomial
+)$
+
+adjugate(A) := block(
+  [n, a, i : 0, C],
+  n : length(A),
+  C : ident(n),
+  while i<n -1 do (
+    i: i+1,
+    C : A . C,
+    a : - trace(C) / i,
+    C: C + a * ident(n)
+  ),
+ if n%2 = 0 then (
+        -C
+)else(
+    C
+)
+    )$
+charpoly_brute_force(A) := block([n],
+  n : length(A),
+  expand(determinant(x*ident(n) - A))
+)$
+adjugate_brute_force(A) := block(
+  [n, B, i, j, submatrix],
+  n : length(A),
+  B : zeromatrix(n,n),
+  for i:1 thru n do
+    for j:1 thru n do (
+      submatrix : submatrix(A, j, i),
+      B[i,j] : (-1)^(i+j) * determinant(submatrix)
+    ),
+  B
+)$
+charpoly_brute_force(A) := block([n],
+  n : length(A),
+  expand(determinant(x*ident(n) - A))
+)$
+adjugate_brute_force(A) := block(
+  [n, B, i, j, submatrix],
+  n : length(A),
+  B : zeromatrix(n,n),
+  for i:1 thru n do
+    for j:1 thru n do (
+      submatrix : submatrix(A, j, i),
+      B[i,j] : (-1)^(i+j) * determinant(submatrix)
+    ),
+  B
+)$
+
+compare_time(A) := block([],
+  print("for matrices of size :", length(A)),
+  print("charpoly1: ", elapsed_real_time(charpoly1(A))),
+  print("charpoly brute force: ", elapsed_real_time(charpoly_brute_force(A))),
+  print("charpoly default: ", elapsed_real_time(charpoly(A,x))),
+  print("adjugate: ", elapsed_real_time(adjugate(A))),
+  print("adjugate brute force: ", elapsed_real_time(adjugate_brute_force(A))),
+  print("adjugate default: ", elapsed_real_time(adjoint(A)))
+)$
+
+/*HW3|Question3 ------------------------------*/
+
+/*Helper Functions ---------------------------*/
+
+sum_of_elements(list) := block(
+   [sum: 0],
+   for i:1 thru length(list) do (
+      sum : sum + list[i]
+   ),
+   sum
+)$
+
+create_jordan_normal_upper(x, m) := block(
+   [j],
+   j : zeromatrix(m, m),
+   
+   for i:1 thru m-1 do(
+     j[i, i] : x,
+     j[i, i+1] : 1
+   ),
+   j[m, m] : x,
+   j
+)$
+
+create_jordan_normal_down(x, m) := block(
+   [j],
+   j : zeromatrix(m, m),
+   
+   for i:1 thru m-1 do(
+     j[i, i] : x,
+     j[i+1, i] : 1
+   ),
+   j[m, m] : x,
+   j
+)$
+
+random_partition(k) := block(
+    [parts: [], n: k, r],
+    while n > 0 do (
+       r : random(n) + 1,
+       if r > n then r : n,
+       parts : endcons(r, parts),
+       n : n - r
+    ),
+    parts
+)$
+
+place_blocks_on_diagonal(matrix_list) := block(
+    [total_rows: 0, total_cols: 0, result, current_row: 1, current_col: 1, i],
+    
+    for i:1 thru length(matrix_list) do (
+        total_rows: total_rows + length(matrix_list[i]),
+        total_cols: total_cols + length(matrix_list[i][1])
+    ),
+    
+    result: zeromatrix(total_rows, total_cols),
+  
+    for i:1 thru length(matrix_list) do (
+        matrix_i: matrix_list[i],
+        rows_i: length(matrix_i),
+        cols_i: length(matrix_i[1]),
+        
+        for r:1 thru rows_i do (
+            for c:1 thru cols_i do (
+                result[current_row + r - 1, current_col + c - 1]: matrix_i[r, c]
+            )
+        ),
+        
+        current_row: current_row + rows_i,
+        current_col: current_col + cols_i
+    ),   
+    result
+)$
+
+characteristic_polynomial(A, var) := block(
+    [poly],
+    poly: factor(charpoly(A, var)),
+    poly
+)$
+
+calculate_pi(polynomial, engin) := block (
+    [k: x - engin, r: 0, count: 0, division_result],
+    
+    while r = 0 do (
+        division_result: divide(polynomial, k, x),  
+        r: division_result[2],                      /* باقیمانده */
+        polynomial: division_result[1],             /* خارج قسمت */
+        count: count + 1  
+    ),  
+   (count - 1)
+)$
+
+mat_ident(n , engin) := block (
+    [m],
+  m: zeromatrix(n , n),
+
+    for i:1 thru n do (
+       m[i , i] : engin
+    ),
+  m
+)$
+
+matrix_polynomial(engin , count , mat) := block (
+    [m , k],
+  m : mat - mat_ident(length(mat) , engin),
+  k : m,
+  for i:2 thru count do (
+     m : m . k
+  ),
+  m  
+)$
+
+zero_list(item) := block(
+    [t: true, matrix],
+    
+    if listp(item) then (
+        matrix : to_matrix([item])
+    ) else (
+	    matrix : item
+	),
+	
+    for i:1 thru length(matrix) do (
+	   for j:1 thru length(matrix[1]) do (
+	     if matrix[i][j] # 0 then (
+            t: false,
+            return(false)
+         )
+	   )   
+    ),
+    t
+)$
+
+list_col_mat (matrix) := block (       /* میاد لیست ستون های یک ماتریس رو بر میگردونه */
+    [e ,list_col , m],
+	list_col : [],
+	m : transpose(matrix),
+	
+	for j:1 thru length(matrix[1]) do (
+	    e : m[j],
+		list_col : endcons (e , list_col)
+	),
+	list_col
+)$
+
+calculate_length_e (e , A , engin) := block (   /*  یه بردار  میگیرهو طول اون بردار رو حساب میکنه */
+   [count : 0 , m , x , i , n],
+   
+   n : length(A),
+   m : A - mat_ident(n , engin),
+   
+   if listp(e) then (
+        x : transpose(to_matrix([e]))
+   )else (
+	    x : e
+   ),
+   i : 0,
+  
+   while not zero_list(x) do (
+        x : m . x,           /* ضرب در (A - λI) */
+        count: count + 1  
+   ),
+   count 
+)$
+
+insertion_sort(list , list2) := block(       /* دو تا لیست داریم و قراره یکی از لیست ها رو با توجه به ترتیب لیست دیگری سورت کنیم */
+    [n : length(list), i, j, key],
+    
+    for i:2 thru n do (
+        key : list[i],
+		key2 : list2 [i],
+        j: i - 1,
+        while j >= 1 and list[j] > key do (
+            list[j+1]: list[j],
+			list2[j + 1] : list2 [j],
+            j: j - 1
+        ),
+        list[j + 1] : key, 
+		list2[j + 1] : key2
+    ),
+    list2 : reverse(list2),
+	list2
+)$
+
+last_pow(col_bi ,length_col_bi , A , engin) := block (
+  [t , m , n],                 /*  یه بردار میگیره و به توان طولش میرسونه تا جایی که ضرب بعدی بردار رو صفر کنه*/
+  
+  t : col_bi,
+  n : length(A),
+  m : A - mat_ident(n , engin),
+  
+  for i:1 thru length_col_bi - 1 do (
+      t : m . t
+  ),
+  t 
+)$
+
+list_last_pow(list_col_bi , list_length_col_bi , A , engin) := block(
+   [col_bi , length_col_bi , l , t],
+   
+   l : [],
+   for i:1 thru length(list_col_bi) do (
+     col_bi : list_col_bi[i],
+	 length_col_bi : list_length_col_bi[i],
+	 t : last_pow(col_bi , length_col_bi , A , engin),
+	 l : endcons(t , l)
+	 
+   ),
+   l
+)$
+
+list_different_powers(e , A , engin):= block (
+   [l : [] , m , k , n],                       /* یه لیست بردار برمیکردونه که توان ها مختلف ستون ها رو نشون میده*/
+
+   n : length(A),
+   m : A - mat_ident(n , engin),
+   k : e,
+   l : endcons(mat_ident(n , 1).k , l),
+   for i:1 thru calculate_length_e(e , A , engin)-1 do (
+      k : m . k,
+      l : endcons(k , l)
+   ),
+   l
+)$
+
+finding_element_in_list(list , element) := block (
+    [t:0],
+	for i:1 thru length(list) do (
+	   if list[i] = element then (
+	      t : i,
+		  return (t)
+	   )
+	),
+	t
+)$
+
+is_independent_bordar(u , v) := block (   /* تشخیص میده دو بردار مستقل خطی هستند یا نه */
+   [m , test],
+   test : true,
+    
+    if listp(u) then (
+        m :to_matrix([u , v])
+   )else (
+	    m : transpose(addcol(u , v))
+   ),
+   if rank(m) < length(m) then test : false,
+   test  
+)$
+
+ratio_of_vactors(u , v):= block(    /* نسبت دو بردار وابسته رو به دست میاره*/
+   [r , a , m],
+   
+    if listp(u) then (
+        m :to_matrix([u , v])
+   )else (
+	    m : transpose(addcol(u , v))
+   ),
+   
+   a : gauss_row_echelon(m)[2][1],
+   r : 0,
+   
+   for i:1 thru length(a) do (
+     for j:1 thru i-1 do (
+	   if a[i,j]#0 then(
+	      r : a[i , j]
+	   )
+	 )
+   ),
+   -r
+)$
+ 
+helper1(ratio, length1, lengthi , x1, xi , A, engin) := block(
+  [m , t , q , w],
+  q : x1,
+  if listp(x1) then q : transpose(to_matrix([x1])),
+  
+  w : xi,
+  if listp(xi) then w : transpose(to_matrix([xi])),
+  
+  for i:1 thru (length1 - lengthi) do(
+    m : (A - mat_ident(length(A) ,engin)),
+    q : m . q
+  ),
+   q : ratio. q,
+   z : w - q,
+   z
+)$
+
+col_to_matrix(list) := block (
+   [m],
+   m : list[1],
+   
+   for i:2 thru length(list)do(
+      m : addcol(m , list[i])
+   ),
+   m
+)$
+
+base_for_generalized_engin(A , engin , bi) := block (
+   [list_col_bi: [] , list_length_col_bi : [], length_e, list_last_pow:[], v:[] , x1 , xi ,r , j:[] ,d , t],
+   d:0,
+   t: [],
+   list_col_bi : list_col_mat(bi),
+   
+   for i:1 thru length(list_col_bi) do (
+       length_e : calculate_length_e (list_col_bi[i] , A , engin),
+	   list_length_col_bi : endcons(length_e , list_length_col_bi)
+   ),
+   list_col_bi : insertion_sort(list_length_col_bi , list_col_bi),
+   list_length_col_bi : reverse (sort(list_length_col_bi)),
+   list_last_pow : list_last_pow(list_col_bi , list_length_col_bi , A , engin),
+   
+   v : list_different_powers(list_col_bi[1] , A , engin),
+   if (list_length_col_bi[1] = calculate_pi(characteristic_polynomial(A, x), engin)) then (
+     j : v
+   ) else (
+     d : calculate_pi(characteristic_polynomial(A, x), engin) - list_length_col_bi[1],
+	 
+	 for k:1 thru d do (
+	   x1 : list_last_pow[1],
+	   xi : list_last_pow [k+1],
+	   
+	   l_x1 : list_length_col_bi[1],
+	   l_xi : list_length_col_bi[k+1],
+	   
+	   r : ratio_of_vactors(x1 , xi),
+	 
+	   y : helper1(r ,l_x1, l_xi, list_col_bi[1], list_col_bi[k+1], A, engin),
+       ly : calculate_length_e (y , A , engin),
+	   yp : last_pow(y , ly, A, engin),
+	   
+	   while not is_independent_bordar(x1 , yp) do (
+	      r : ratio_of_vactors(x1 , yp),
+	      y : helper1(r, l_x1, ly, list_col_bi[1],y, A ,engin),
+		  ly : calculate_length_e (y , A , engin),
+	      yp : last_pow(y , ly, A, engin)
+		  
+	   ),
+	   v : endcons (y , v)
+       
+	 )
+   ),
+   v
+)$
+
+calculate_bi(engin , L , A) := block (
+   	[bi , poly , i],
+	poly : characteristic_polynomial(A , x),
+	bi : mat_ident(length(A) , 1),
+	i : finding_element_in_list(L , engin),
+      
+    for j:1 thru i-1 do (
+	   bi : bi . matrix_polynomial(L[j] , calculate_pi(poly , L[j]) , A) 
+	), 
+	for j:i+1 thru length(L) do (
+	    bi : bi . matrix_polynomial(L[j] , calculate_pi(poly , L[j]) , A)
+	),
+	bi
+)$
+
+
+/*Q3~a---------------------------------*/
+random_jordan2(L) := block(
+   [list_engin , list_algebric_rep , n , list_normal_jordan , x , m , parts , j],
+
+   list_engin : L[1],
+   list_algebric_rep: L[2],
+   
+   n : sum_of_elements(list_algebric_rep),
+   list_normal_jordan : [],
+   
+   for i:1 thru length(list_algebric_rep) do (
+      x : list_engin[i],
+	  m : list_algebric_rep[i],
+	  
+	  parts : random_partition(m),
+      
+	  for j:1 thru length(parts) do (
+	     list_normal_jordan : endcons(create_jordan_normal_upper(x , parts[j]) , list_normal_jordan)
+	  )	  
+   ),
+   j : place_blocks_on_diagonal(list_normal_jordan),
+  
+  j
+)$
+
+random_jordan1(L) := block(
+   [list_engin , list_algebric_rep , n , list_normal_jordan , x , m , parts , j],
+   
+   list_engin : L[1],
+   list_algebric_rep: L[2],
+   
+   n : sum_of_elements(list_algebric_rep),
+   list_normal_jordan : [],
+   
+   for i:1 thru length(list_algebric_rep) do (
+      x : list_engin[i],
+	  m : list_algebric_rep[i],
+	  
+	  parts : random_partition(m),
+      
+	  for j:1 thru length(parts) do (
+	     list_normal_jordan : endcons(create_jordan_normal_down(x , parts[j]) , list_normal_jordan)
+	  )	  
+   ),
+   j : place_blocks_on_diagonal(list_normal_jordan),
+  
+  j
+)$
+
+/* Q3~b ----------------------------------*/
+
+decomp_mat(A , list) := block (
+   [list_bi , poly , bi , b , L],
+   if listp(A) then A: to_matrix(A),
+   L : list[1],
+   poly : characteristic_polynomial(A , x),
+   list_bi : [],
+   
+   for i:1 thru length(L) do (
+     
+   bi : mat_ident(length(A) , 1),
+      
+     for j:1 thru i-1 do (
+     bi : bi . matrix_polynomial(L[j] , calculate_pi(poly , L[j]) , A) 
+   ), 
+   for j:i+1 thru length(L) do (
+      bi : bi . matrix_polynomial(L[j] , calculate_pi(poly , L[j]) , A)
+   ),
+   
+   list_bi : endcons(bi , list_bi)
+   
+   ),
+   b : sum_of_elements(list_bi),
+   list_bi : endcons(b , list_bi),
+   list_bi
+)$
+/* Q3~c --------------------------------------------*/
+
+
+jordan_basis(A , list) := block (
+   [v:[] , p , pp , j , list_bi , t , L:[]],
+   L : list[1],
+   
+   list_bi : decomp_mat(A , L),
+    
+   for i:1 thru length(L) do (
+      t : base_for_generalized_engin(A , L[i] , calculate_bi(L[i] , L , A)),
+	  v : append (t , v)
+   ),
+   v
+   
+)$
+
+/* Q3~d----------------------- */
+jordan_normal_form(A , list) := block (
+   [v:[] , p , pp , j , list_bi , t , L],
+   L : list[1],
+   list_bi : decomp_mat(A , L),
+    
+   for i:1 thru length(L) do (
+      t : base_for_generalized_engin(A , L[i] , calculate_bi(L[i] , L , A)),
+	  v : append (t , v)
+   ),
+   p: col_to_matrix(v),
+   pp : invert(p),
+   
+   
+   j: pp. A . p,
+   [j , p]
+
+)$
+  
+
+/*Q3~e------------------------------------*/
+jordan_chevalley(A, L):= block(
+[n: length(A), JT, i, D, N, J, T, TI],
+D: zeromatrix(n, n), N: zeromatrix(n, n),
+JT: jordan_normal_form(A, L), J: JT[1], T: JT[2], 
+for i:1 thru n do D[i][i]: J[i][i],
+for i:1 thru n-1 do N[i][i+1]: J[i][i+1], 
+for i:2 thru n do N[i][i-1]: J[i][i-1], 
+TI: invert(T), D: T.D.TI, N: T.N.TI,
+[D, N])$
+
+
+
+/*HW3|Question4 ------------------------------*/
+
+/*Helper Functions ---------------------------*/
+
+/*swap row i with j*/
+swap_row(M, i, j) := block (                
+L: M[i],
+M[i]: M[j],
+M[j]: L,
+M
+)$
+
+/*add k times row j to row i */
+add_row(M, i, j, k) := block(
+M[i]: M[i] + k * M[j],
+M
+)$
+
+/*multiply row i by scalar k*/
+multiply_row(M, i, k) := block(
+M[i]: k * M[i],
+M
+)$
+
+
+/*defining function*/
+gauss_row_echelon(A) := block(
+    [A: to_matrix(A), P, E: [], n: length(A), m: length(A[1 ]), i:1 , j, k:1 , pivot, factor, det_factor:1 ],
+    P: [copymatrix(A)],
+    
+    while i <= n and k <= m do (
+        /*finding pivot row*/
+        pivot: i,
+        while pivot <= n and A[pivot][k] = 0  do pivot: pivot + 1,
+        if pivot > n then continue, /* No pivot in this column*/
+        
+        if pivot <= n then (
+             /*swap rows*/
+            if pivot > i and A[i][k]=0  then (
+                A: swap_row(A, i, pivot),
+                det_factor: -det_factor,
+                E: endcons(ident(n), E),
+                E[length(E)]: swap_row(E[length(E)], i, pivot),
+                P: endcons(copymatrix(A), P)
+            ),
+            
+           /*Eliminating blew rows*/
+            for j: i+1 thru n do (
+                if A[j][k] # 0 and A[i][k] # 0  then (
+                    factor: -A[j][k]/A[i][k],
+                    A: add_row(A, j, i, factor),
+                    E: endcons(ident(n), E),   /*endcons: appends an element to the end of a list*/ 
+                    E[length(E)]: add_row(E[length(E)], j, i, factor),   /*elementary matrix for swap*/
+                    P: endcons(copymatrix(A), P)
+                )
+            ),
+            i: i+1
+        ),
+        k: k+1
+    ),
+    [P, E]
+)$
+
+
+/*defining function*/
+gauss_jordan(A) :=  block(
+    [A: to_matrix(A), P, E: [], n: length(A), m: length(A[1 ]), i:1 , j, k:1 , pivot, factor],
+    P: [copymatrix(A)],
+    
+    while i<=n and k<=m do (
+    /*finding pivot row*/
+        pivot: i,
+        while pivot <=n and A[pivot][k] = 0  do pivot: pivot +1 ,
+        if pivot > n then continue,
+        
+       if pivot<=n then (
+            /*swap rows*/
+        if pivot > i and A[i][k]=0  then (
+                A: swap_row(A, i, pivot),
+                E: endcons(ident(n), E),               
+                E[length(E)]: swap_row(E[length(E)], i, pivot),       
+                P: endcons(copymatrix(A), P)       
+        ),
+        
+         /* scale pivot to 1 */
+        if A[i][k] # 1  and A[i][k] #0  then (
+        factor: 1 /A[i][k],
+        A: multiply_row(A, i, factor),
+        E: endcons(ident(n), E),
+        E[length(E)]: multiply_row(E[length(E)], i, factor),
+        P: endcons(copymatrix(A), P)
+        ),
+        
+        /*Eliminating blew and above rows*/
+        for j:1  thru n do (
+        if j#i  and  A[j][k]#0  and A[i][k]#0 then (
+            factor: -A[j][k]/A[i][k],
+            A: add_row(A, j, i, factor),
+            E: endcons(ident(n), E),
+            E[length(E)]: add_row(E[length(E)], j, i, factor),
+            P: endcons(copymatrix(A), P)
+                )
+            ),
+            i: i+1
+            ),
+        k: k+1
+        ),
+    [P, E]
+    )$
+
+ 
+
+check_zero_list(list) := block(
+   [test],
+   test: true,
+   for i:1 thru length(list) do(
+     if list[i] # 0 then test : false
+   ),
+   test
+)$
+
+count_zero_rows(M) := block(
+  [count],
+  count : 0,
+  for i:1 thru length(M) do (
+    if check_zero_list(M[i]) = true then (
+      count : count + 1
+    )
+  ),
+  count
+)$
+
+
+rank(matrix) := block(
+   [n , r],
+   n : length(matrix),
+   r : echelon(matrix),
+   rank : n - count_zero_rows(r),
+   rank
+)$
+
+row_space(m) := block (
+  [R , num , rm],
+  rm : echelon(m),
+  num : rank(rm),
+  R : [],
+  for i : 1 thru num do (
+    R : endcons(rm[i] , R)
+  ),
+  R
+)$
+
+
+
+
+scalar_product(l1, l2):= block([x: 0, n: length(l1), i],
+for i:1 thru n do (x: x + l1[i]*l2[i]), x)$
+
+yekke_sazi(M):= block([T: transpose(M), i, sum, j],
+for i:1 thru length(T) do (
+    sum: 0,
+    for j: 1 thru length(T[i]) do (
+        sum: sum + T[i][j]*T[i][j]), 
+    sum: sqrt(sum), if sum # 0 then
+    for j:1 thru length(T[i]) do (
+        T[i][j]: T[i][j]/sum)),
+transpose(T))$
+
+fazaye_vizhe(M, x):= block([i, C: copymatrix(M)],
+for i:1 thru length(C) do C[i][i]: C[i][i]-x, C)$
+
+is_not_zero(l):= block([i, b: false],
+for i:1 thru length(l) do 
+    (if l[i][1] # 0 then (b: true)),
+    b)$
+
+is_not_zero2(L) := block(
+  [b], b: false,
+  for i: 1 thru length(L) do
+    if L[i] # 0 then b: true,
+  b)$
+
+get_D(M):= block(
+[D, i, pivot, j],
+for i:1 thru length(M) do (
+    if M[i][i] # 0 then pivot: i),
+D: zeromatrix(pivot, pivot),
+for i:1 thru pivot do (
+    for j: 1 thru pivot do (
+        D[i][j]: M[i][j]
+        )
+    ),
+D)$
+
+diag_invert(D):= block(
+[i],
+for i:1 thru length(D) do (
+    if D[i][i] # 0 then D[i][i]: 1/D[i][i]),
+D)$
+
+row_echelon_form(A) := block(
+    [n: length(A), m: length(A[1]), i, j, pivot, factor],
+    A: copymatrix(A), 
+    for i: 1 thru n do (
+        pivot: 1,
+        while (pivot <= m and A[i][pivot] = 0) do (
+            pivot: pivot + 1
+        ), 
+        if pivot <= m and i < n then (
+            for j: i+1 thru n do (
+                if A[j][pivot] # 0 then ( 
+                    factor: -A[j][pivot] / A[i][pivot],
+                    A: add_row(A, j, i, factor)
+                )
+            )
+        )
+    ),
+    A
+)$
+
+
+get_complement(P, V):= block([L:[], M: zeromatrix(0,0), R, n: length(P), m: length(V), G],
+    for i:1 thru n do M: addrow(M, P[i]),
+    for i:1 thru m do M: addrow(M, V[i]),
+    R: row_echelon_form(copymatrix(M)), 
+    for i: n+1 thru n+m do if is_not_zero2(R[i]) then L: append(L, [M[i]]),
+    L)$
+
+Null_Space(matrix) := block(
+    [m , n , I , M , result , N , rm],
+  
+  n: length(matrix),
+    m: length(matrix[1]),
+  
+    I:ident(m),
+  M: addcol(transpose(matrix), I),
+    rm : gauss_jordan(M)[1][length(gauss_jordan(M)[1])],
+  
+  result : zeromatrix(m - rank(transpose(matrix)), m),
+  for i:1 thru (m - rank(transpose(matrix))) do (
+    for j:1 thru m do (
+       result[i][j] : M[rank(transpose(matrix)) + i][n + j]
+    )
+  ),
+    N : row_space(result),
+  N
+
+)$
+
+
+/*------------Q4-a------------*/
+gram_schmidt(A):= block(
+[X: zeromatrix(0,0), Q, R, T, i, j, zeros: 0], A: to_matrix(A), T: transpose(A),
+    for i:1 thru length(T) do (
+        l: T[i], 
+        for j:1 thru i-1-zeros do (
+        a: scalar_product(X[j], T[i]), b: scalar_product(X[j], X[j]), 
+       if b # 0 then l: l - (a/b)*X[j]
+        ), if is_not_zero2(l) then X: addrow(X, l) else zeros: zeros+1
+    ), X: transpose(X), Q: yekke_sazi(X), R: transpose(Q).A,
+    [X, Q, R])$
+
+
+/*--------------Q4-b------------*/
+orthogonal_diag(A,L):= block([i, V, Q: zeromatrix(0,0), Q1, j, c, D, L1: L[1], A: to_matrix(A)], 
+    for i:1 thru length(L1) do (
+    V: fazaye_vizhe(A, L1[i]), V: Null_Space(V), V: to_matrix(V), V: transpose(V),
+    Q1: (gram_schmidt(V))[2], 
+    for j:1 thru length(Q1) do (
+        c: col(Q1, j),
+        if is_not_zero(c) = true then (Q: addcol(Q, c)))
+    ), D: transpose(Q).A.Q,
+[transpose(Q), D])$
+
+/*--------------Q4-c------------*/
+svd(M):= block(
+    [U, S, V, EV, A, OD, R, r, i, V1: zeromatrix(0,0), U1, D, I, U2, M: to_matrix(M)],
+    A: transpose(M).M, EV: eigenvalues(A), OD: orthogonal_diag(A, EV), D: OD[2], D: get_D(D),
+    V: OD[1], R: row_space(A), r: length(R),
+    for i:1 thru r do (
+        V1: addcol(V1, col(V, i))),
+    U1: diag_invert(sqrt(D)).transpose(V1).transpose(M), I: ident(length(U1[1])),
+    U2: get_complement(U1, I), U: U1, 
+    for i:1 thru length(U2) do U: addrow(U, U2[i]),
+    U: transpose(U), U: gram_schmidt(U)[1], U: transpose(U),
+    S: U.M.V, U: transpose(U),
+[U, S, V])$
+
+
+  /*HW3|Question5 ------------------------------*/
+
+
+
+ 
+  linear_model(A, vals, parameters) := block(   /* vals: real price of the houses */ /*parameters: parameters of the houses like [S  R  P] */
+      [H, c, alpha, model],
+      A: to_matrix(A),
+      H: A,
+      c: transpose(matrix(vals)),   /* column vector of values */ 
+      
+      /* Compute alpha: α=((H^T)*H)^(−1) * (H^T) * c */
+      alpha : invert(transpose(H) . H) . transpose(H) . c,
+      
+      /*Building linear model*/
+      model : expand(sum(alpha[i][1] * parameters[i], i, 1, length(parameters))),
+      
+      return(float(model))
+  )$
+
