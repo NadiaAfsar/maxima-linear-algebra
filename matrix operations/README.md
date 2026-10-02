@@ -1,4 +1,4 @@
-# Linear Algebra Projects in Maxima
+# Matrix Operations in Maxima
 
 A collection of nine comprehensive linear algebra implementations in **Maxima** (Computer Algebra System), covering matrix decompositions, Gaussian elimination, determinant computation, adjugate matrices, and PLU/LPL/LPU factorizations. Developed as part of the Linear Algebra course at Sharif University of Technology.
 
