@@ -6,9 +6,9 @@ A collection of three comprehensive linear algebra homework assignments implemen
 
 | # | Topic | Key Concepts | Folder |
 |---|-------|--------------|--------|
-| 1 | **Matrix Operations & Decompositions** | Row echelon, triangular inverse, Gaussian elimination, determinant (2 methods), inverse (2 methods), adjugate, LPL / LPU / PLU | [hw1-matrix-operations/](hw1-matrix-operations/) |
-| 2 | **Subspaces, Basis & Change of Basis** | Four fundamental subspaces, subspace sum / intersection, particular solution of `Ax = b`, change of basis, matrix linear equation solver | [hw2-subspaces-basis/](hw2-subspaces-basis/) |
-| 3 | **F₂ Systems, Jordan Form & SVD** | Lights Out over **F₂**, characteristic polynomial, adjugate, Jordan normal form, Jordan–Chevalley decomposition, Gram-Schmidt, QR, SVD, linear models (least squares) | [hw3-f2-jordan-svd/](hw3-f2-jordan-svd/) |
+| 1 | **Matrix Operations & Decompositions** | Row echelon, triangular inverse, Gaussian elimination, determinant (2 methods), inverse (2 methods), adjugate, LPL / LPU / PLU | [hw1-matrix-operations/](matrix-operations/) |
+| 2 | **Subspaces, Basis & Change of Basis** | Four fundamental subspaces, subspace sum / intersection, particular solution of `Ax = b`, change of basis, matrix linear equation solver | [hw2-subspaces-basis/](subspaces-basis/) |
+| 3 | **F₂ Systems, Jordan Form & SVD** | Lights Out over **F₂**, characteristic polynomial, adjugate, Jordan normal form, Jordan–Chevalley decomposition, Gram-Schmidt, QR, SVD, linear models (least squares) | [f2-jordan-svd/](hw3-f2-jordan-svd/) |
 
 ## 👥 Team "MadMax"
 
