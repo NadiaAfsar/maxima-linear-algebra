@@ -7,8 +7,8 @@ This project implements the four fundamental subspaces, subspace operations, par
 | Member | Primary Contributions |
 |--------|----------------------|
 | **Nadia Afsar** | **Q2 (Subspaces & Complements), Part of Q5 (Homogeneous Basis)** |
-| Roya Zeraati | Q3, Q5 |
-| Sara Mohammadi Mohammadi | Q1, Q5 |
+| Roya Zeraati | Q1, Q5 |
+| Sara Mohammadi Mohammadi | Q3, Q5 |
 | Mahdieh Yazdan Panah | Q4, Q5 |
 
 > **Note:** While each member led specific questions, all team members contributed to debugging, algorithm design, and code review throughout the project.
