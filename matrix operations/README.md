@@ -13,7 +13,7 @@ This project was developed collaboratively by a four-member team:
 | Sara Mohammadi Mohammadi | Q2, Q8 |
 | Mahdieh Yazdan Panah | Q5, Q6 |
 
-> **Note:** While each member led specific questions, all team members contributed to debugging, code review, and architectural design throughout the project.
+> **Note:** While each member led specific questions, all team members contributed to debugging, code review, and algorithm design throughout the project.
 
 ## 📖 Project Overview
 
