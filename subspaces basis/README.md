@@ -2,7 +2,7 @@
 
 This project implements the four fundamental subspaces, subspace operations, particular solutions of linear systems, change of basis matrices, and a general matrix linear equation solver — all in **Maxima** (Computer Algebra System).
 
-## 👥 Team "MadMax"
+##  Team "MadMax"
 
 | Member | Primary Contributions |
 |--------|----------------------|
@@ -13,7 +13,7 @@ This project implements the four fundamental subspaces, subspace operations, par
 
 > **Note:** While each member led specific questions, all team members contributed to debugging, algorithm design, and code review throughout the project.
 
-## 📋 Implemented Questions
+##  Implemented Questions
 
 | # | Topic | Key Functions |
 |---|-------|---------------|
@@ -25,7 +25,7 @@ This project implements the four fundamental subspaces, subspace operations, par
 
 ⭐ = Implemented (fully or partially) by Nadia Afsar
 
-## 🔍 Detailed Contributions
+##  Detailed Contributions
 
 ### Question 2 — Subspaces (Fully Implemented by Nadia Afsar)
 
