@@ -2,7 +2,7 @@
 
 This project implements advanced linear algebra topics in **Maxima** (Computer Algebra System), including **linear systems over the finite field F₂** (Lights Out), characteristic polynomials, adjugate matrices, **Jordan decomposition**, **Gram-Schmidt orthogonalization**, **QR decomposition**, **SVD**, and **least-squares linear models**.
 
-## 👥 Team "MadMax"
+##  Team "MadMax"
 
 | Member | Primary Contributions |
 |--------|----------------------|
@@ -13,7 +13,7 @@ This project implements advanced linear algebra topics in **Maxima** (Computer A
 
 > **Note:** While each member led specific questions, all team members contributed to debugging, algorithm design, and code review throughout the project.
 
-## 📋 Implemented Questions
+##  Implemented Questions
 
 | # | Topic | Key Functions |
 |---|-------|---------------|
@@ -25,7 +25,7 @@ This project implements advanced linear algebra topics in **Maxima** (Computer A
 
 ⭐ = Implemented by Nadia Afsar
 
-## 🔍 Detailed Contributions
+##  Detailed Contributions
 
 ### Question 4 — Gram-Schmidt, QR, and SVD (Implemented by Nadia Afsar)
 
