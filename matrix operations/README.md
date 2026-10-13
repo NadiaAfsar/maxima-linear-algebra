@@ -2,7 +2,7 @@
 
 A collection of nine comprehensive linear algebra implementations in **Maxima** (Computer Algebra System), covering matrix decompositions, Gaussian elimination, determinant computation, adjugate matrices, and PLU/LPL/LPU factorizations. Developed as part of the Linear Algebra course at Sharif University of Technology.
 
-## 👥 Team "MadMax"
+##  Team "MadMax"
 
 This project was developed collaboratively by a four-member team:
 
@@ -15,7 +15,7 @@ This project was developed collaboratively by a four-member team:
 
 > **Note:** While each member led specific questions, all team members contributed to debugging, code review, and algorithm design throughout the project.
 
-## 📖 Project Overview
+##  Project Overview
 
 This project implements a comprehensive toolbox for linear algebra operations in Maxima, including:
 
@@ -28,7 +28,7 @@ This project implements a comprehensive toolbox for linear algebra operations in
 - **Matrix inversion** via two methods (Gaussian elimination vs. adjugate matrix)
 - **LPL, LPU, and PLU decompositions**
 
-## ✨ Implemented Functions
+##  Implemented Functions
 
 ### Question 1: Matrix Processing ⭐ (Implemented by Nadia Afsar)
 - `to_matrix(L)` — Converts lists to Maxima matrices (accepts both formats).
@@ -76,7 +76,7 @@ This project implements a comprehensive toolbox for linear algebra operations in
 ### Question 9: PLU Decomposition
 - `plu(A)` — PLU decomposition with elementary row operations.
 
-## 🔬 Key Highlights
+##  Key Highlights
 
 ### 1. Operations Relevant to Cryptography
 
