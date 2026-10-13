@@ -2,7 +2,7 @@
 
 A collection of three comprehensive linear algebra homework assignments implemented in **Maxima** (Computer Algebra System). These projects cover matrix decompositions, subspaces, Gaussian elimination, determinant and inverse computation, Jordan form, Gram-Schmidt, QR, SVD, and least-squares linear models — with a focus on **operations over finite fields** relevant to cryptography.
 
-## 📚 Homework Assignments
+##  Homework Assignments
 
 | # | Topic | Key Concepts |
 |---|-------|--------------|
@@ -10,7 +10,7 @@ A collection of three comprehensive linear algebra homework assignments implemen
 | 2 | **Subspaces, Basis & Change of Basis** | Four fundamental subspaces, subspace sum / intersection, particular solution of `Ax = b`, change of basis, matrix linear equation solver |
 | 3 | **F₂ Systems, Jordan Form & SVD** | Lights Out over **F₂**, characteristic polynomial, adjugate, Jordan normal form, Jordan–Chevalley decomposition, Gram-Schmidt, QR, SVD, linear models (least squares) |
 
-## 👥 Team "MadMax"
+##  Team "MadMax"
 
 This series of projects was developed collaboratively by a four-member team. Each member led specific questions, while all contributed to debugging, algorithm design, and code review.
 
@@ -21,7 +21,7 @@ This series of projects was developed collaboratively by a four-member team. Eac
 | Sara Mohammadi Mohammadi | HW1: Q4, Q9 <br> HW2: Q3, Q5 <br> HW3: Q2 |
 | Mahdieh Yazdan Panah | HW1: Q5, Q6 <br> HW2: Q4, Q5 <br> HW3: Q1, Q5 |
 
-## 🔍 Summary of My Contributions
+##  Summary of My Contributions
 
 ### HW1 — Matrix Operations & Decompositions
 - **Q3: Block Matrices** — `block_matrix`, `block_diagonal_matrix`, with supporting `horizontal_join`, `vertical_join`, and `join_matrices`.
@@ -36,7 +36,7 @@ This series of projects was developed collaboratively by a four-member team. Eac
 
 For the remaining questions, I contributed to **algorithm design** and **debugging** — especially the F₂ linear system formulation in HW3 Q1 and the Jordan form construction in HW3 Q3.
 
-## ✨ Cross-Project Highlights
+##  Cross-Project Highlights
 
 ### 1. Operations over Finite Field F₂ (HW3, Q1) ⭐
 The **Lights Out** puzzle is modeled as a linear system `Ax = b` over **F₂** (mod 2 arithmetic):
@@ -64,7 +64,7 @@ This same algebraic structure underlies **AES** (S-box = field inversion in GF(2
 - **QR decomposition** appears in numerical linear algebra and cryptographic protocols.
 - **Least squares** (HW3, Q5) is foundational for **linear regression** and **statistical cryptanalysis**.
 
-## 🛠️ Technologies
+##  Technologies
 
 - **Tool:** Maxima (Computer Algebra System)
 - **Language:** Maxima script (`.mac` files)
